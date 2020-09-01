@@ -1,4 +1,4 @@
-module Plots
+module TravelingWaveSimulationsPlotting
 
 using MakieLayout, Makie
 using TravelingWaveSimulations, Simulation73, NeuralModels
