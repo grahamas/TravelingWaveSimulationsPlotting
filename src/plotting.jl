@@ -67,3 +67,125 @@ function heatmap_sweep_with_target(sweep::AbstractArray,
     Makie.save( sim_heatmap_path, scene)
 
 end
+
+function figure_contrast_monotonic_blocking_all((x_sym, y_sym)::Tuple{Symbol,Symbol}, (other_x_sym, other_y_sym)::Tuple{Symbol,Symbol},
+                                     monotonic_fpath::AbstractString, 
+                                     blocking_fpath::AbstractString,
+                                     property_sym::Symbol;
+                                     scene_resolution=(1200,1200))    
+    scene, layout = layoutscene(resolution=scene_resolution)
+
+
+    layout[1:3,1] = monotonic_sweep_ax = reduce_2d_and_steepest_line_and_histogram!(
+                                                            scene, 
+                                                            (x_sym, y_sym),
+                                                            monotonic_fpath,
+                                                            property_sym; 
+                                                            facet_title="Monotonic")
+    layout[1:3,2] = blocking_sweep_ax = reduce_2d_and_steepest_line_and_histogram!(
+                                                            scene, 
+                                                            (x_sym, y_sym),
+                                                            blocking_fpath,
+                                                            property_sym; 
+                                                            facet_title="Blocking", 
+                                                            hide_y=true)
+    layout[1:3,3] = other_monotonic_sweep_ax = reduce_2d_and_steepest_line_and_histogram!(
+                                                           scene, 
+                                                           (other_x_sym, other_y_sym),
+                                                           monotonic_fpath,
+                                                           property_sym; 
+                                                           facet_title="Monotonic")
+    layout[1:3,4] = other_blocking_sweep_ax = reduce_2d_and_steepest_line_and_histogram!(
+                                                          scene, 
+                                                          (other_x_sym, other_y_sym),
+                                                          blocking_fpath,
+                                                          property_sym; 
+                                                          facet_title="Blocking",
+                                                          hide_y=true,
+                                                          colorbar_width=25)
+    layout[end+1, 1] = LText(scene, "($(x_sym), $(y_sym))", tellwidth=false)
+    layout[end+1, 2] = LText(scene, "($(x_sym), $(y_sym))", tellwidth=false)
+    layout[end, 3] = LText(scene, "($(other_x_sym), $(other_y_sym))", tellwidth=false)
+    layout[end, 4] = LText(scene, "($(other_x_sym), $(other_y_sym))", tellwidth=false)
+
+    layout[end-1:end-2, 0] = LText(scene, "prop. sims", rotation=pi/2, tellheight=false)
+
+    return scene, layout
+    
+end
+
+function figure_example_contrast_monotonic_blocking_all((x_sym, y_sym)::Tuple{Symbol,Symbol}, 
+                                                        other_syms::Tuple{Symbol,Symbol},
+                                                        example_specs::Array{<:NamedTuple},
+                                     monotonic_fpath::AbstractString, 
+                                     blocking_fpath::AbstractString,
+                                     property_sym::Symbol; kwargs...)
+    monotonic_prototype_name, monotonic_spec = read_params_from_data_path(monotonic_fpath)
+    blocking_prototype_name, blocking_spec = read_params_from_data_path(blocking_fpath)
+    @show blocking_spec
+
+    @show monotonic_spec
+    monotonic_prototype, blocking_prototype = get_prototype.((monotonic_prototype_name, blocking_prototype_name))
+
+    scene_height = 450 * 3# (2 + length(example_specs))
+    scene_width = 450 * 8
+    scene, layout = figure_contrast_monotonic_blocking_all((x_sym, y_sym), other_syms, monotonic_fpath, blocking_fpath, property_sym; scene_resolution=(scene_width, scene_height), kwargs...)
+    scene.attributes.attributes[:fontsize] = 20
+
+    @show merge(blocking_spec, pairs(example_specs[2]))
+    examples_layout = GridLayout()
+    count = 0
+    for spec in example_specs
+        count += 1
+        _, monotonic_example_exec = execute_single_modification(monotonic_prototype, merge(monotonic_spec, pairs(spec), Dict(:save_everystep => true)))
+        @show ExecutionClassifications(monotonic_example_exec, n_traveling_frames_threshold=60).has_propagation
+        _, blocking_example_exec = execute_single_modification(blocking_prototype, merge(blocking_spec, pairs(spec), Dict(:save_everystep => true)))
+        @show ExecutionClassifications(blocking_example_exec, n_traveling_frames_threshold=60).has_propagation
+        
+        examples_layout[count,1] = monotonic_ax = exec_heatmap!(scene, monotonic_example_exec; clims=(0.0,0.5), no_labels=true)
+        examples_layout[count,2] = blocking_ax = exec_heatmap!(scene, blocking_example_exec;
+                                                           clims=(0.0,0.5), no_labels=true)
+        examples_layout[count,3] = spec_text = LText(scene, 
+                                                     join(["$k = $v" for (k,v) in pairs(spec)], "\n"), tellheight=false)
+    end
+
+    examples_layout[0,1] = LText(scene, "Monotonic", tellwidth=false)
+    examples_layout[1,2] = LText(scene, "Blocking", tellwidth=false)
+    examples_layout[end,0] = LText(scene, "space (μm)", rotation=pi/2, tellheight=false)
+    examples_layout[end+1,2] = LText(scene, "time (ms)", tellwidth=false)
+    
+    ex_x, ex_y = size(examples_layout)
+    @show size(examples_layout)
+    next_col = size(layout)[2] + 1
+    layout[1:4,next_col:next_col+3] = examples_layout
+    
+	label_a = layout[1, 2, TopLeft()] = LText(scene, "A", textsize = 35,
+    	font = "Noto Sans Bold", halign = :right)
+	label_b = layout[1, 4, TopLeft()] = LText(scene, "B", textsize = 35,
+    	font = "Noto Sans Bold", halign = :right)
+	label_c = layout[1, 6, TopLeft()] = LText(scene, "C", textsize = 35,
+    	font = "Noto Sans Bold", halign = :right)
+
+    return scene, layout
+end
+
+
+
+function save_figure_example_contrast_monotonic_blocking_all((x_sym, y_sym)::Tuple{Symbol,Symbol}, other_syms::Tuple{Symbol,Symbol}, 
+                                                         example_specs::Array{<:NamedTuple},
+                                     monotonic_fpath::AbstractString, 
+                                     blocking_fpath::AbstractString,
+                                     property_sym::Symbol,
+                                     unique_id::String=""; kwargs...)
+    scene, _ = figure_example_contrast_monotonic_blocking_all((x_sym, y_sym), other_syms,
+                                               example_specs,
+                                               monotonic_fpath,
+                                               blocking_fpath,
+                                               property_sym; kwargs...)
+    fname = "figure_examples_contrast_monotonic_blocking_all_$(x_sym)_$(y_sym)_$(property_sym).png"
+    mkpath(plotsdir(unique_id))
+    @info "saving $(plotsdir(unique_id,fname))"
+    Makie.save(plotsdir(unique_id,fname), scene)
+end
+
+

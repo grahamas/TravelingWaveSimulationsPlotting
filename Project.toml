@@ -4,10 +4,15 @@ authors = ["Graham Smith <grahamas@gmail.com>"]
 version = "0.1.0"
 
 [deps]
+AxisIndices = "f52c9ee2-1b1c-4fd8-8546-6350938c7f11"
+DiffEqOperators = "9fdde737-9c7f-55bf-ade8-46b3f136cc48"
+Interpolations = "a98d9a8b-a2ab-59e6-89dd-64a1c18fca59"
 Makie = "ee78f7c6-11fb-53f2-987a-cfe4a2b5a57a"
 MakieLayout = "5a521ce4-ebb9-4793-b5b7-b334dfe8393c"
 NeuralModels = "a199b2c4-7a51-11e9-2fe1-b9a1a5fe2912"
+Optim = "429524aa-4258-5aef-a3af-852621145aeb"
 Simulation73 = "310cc8c8-1ffe-11e9-399c-c5a008d6bdcc"
 Simulation73Plotting = "2846d769-be22-4083-a76c-fdabc4869842"
+StaticArrays = "90137ffa-7385-5640-81b9-e52037218182"
 TravelingWaveSimulations = "b7a787de-74f3-11e9-2c3d-21bc6dc7d0e1"
 WilsonCowanModel = "bdbc91b4-201b-11e9-2b98-89611552dcef"
