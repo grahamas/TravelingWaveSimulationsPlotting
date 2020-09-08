@@ -29,6 +29,7 @@ function reduce_2d_and_steepest_line_and_histogram!(scene::Scene,
                                                    facet_title, titlesize=20, hide_y=false,
                                                    colorbar_width=nothing)
     prototype_name, sim_params = read_params_from_data_path(fpath)
+    @show fpath
     whole_ensemble_data = TravelingWaveSimulations.load_ExecutionClassifications(AbstractArray, fpath)[property_sym]
 
     data = _collapse_to_axes(whole_ensemble_data, x_sym, y_sym)

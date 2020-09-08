@@ -53,6 +53,7 @@ function reduce_along_max_central_gradient(data::AbstractAxisArray{T,2}, reducti
     xs, ys = axes_keys(data)
     center_pt = [_midpoint(xs), _midpoint(ys)] 
     interpolation = interpolate(data, Gridded(Linear()))
+    
     neg_gradient_norm(coord) = -norm(Interpolations.gradient(interpolation, coord...))
     result_optim = optimize(neg_gradient_norm, [xs[begin], ys[begin]], 
                                                [xs[end], ys[end]], 
