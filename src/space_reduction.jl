@@ -45,6 +45,18 @@ function squish(interpolation::AbstractInterpolation, target_line::PointVectorLi
     return squished_dists, squished_vals, squished_points, squished_line
 end
 
+# using ForwardDiff
+# import ForwardDiff.Dual
+
+# struct DiffCache{T, S}
+#     du::Vector{T}
+#     dual_du::Vector{S}
+# end
+# function DiffCache(T, length, ::Type{Val{chunk_size}}) where chunk_size
+#     DiffCache(zeros(T, length), zeros(Dual{chunk_size, T}, length))
+# end
+# DiffCache(u::AbstractArray) = DiffCache(eltype(u),length(u),Val{ForwardDiff.pickchunksize(u |> length)})
+
 function _midpoint(arr::AbstractArray)
     @assert arr[begin] < arr[end]
     return (arr[end] - arr[begin]) / 2 + arr[begin]
@@ -53,8 +65,16 @@ function reduce_along_max_central_gradient(data::AbstractAxisArray{T,2}, reducti
     xs, ys = axes_keys(data)
     center_pt = [_midpoint(xs), _midpoint(ys)] 
     interpolation = interpolate(data, Gridded(Linear()))
-    
-    neg_gradient_norm(coord) = -norm(Interpolations.gradient(interpolation, coord...))
+    @show data
+    @show xs
+    @show ys
+    @show center_pt
+
+    function neg_gradient_norm(coord) 
+        -norm(Interpolations.gradient(interpolation, coord...))
+    end
+
+    @show map(neg_gradient_norm, Iterators.product(xs,ys))
     result_optim = optimize(neg_gradient_norm, [xs[begin], ys[begin]], 
                                                [xs[end], ys[end]], 
                                                center_pt, 
