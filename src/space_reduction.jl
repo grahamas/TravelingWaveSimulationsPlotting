@@ -49,11 +49,11 @@ function _midpoint(arr::AbstractArray)
     @assert arr[begin] < arr[end]
     return (arr[end] - arr[begin]) / 2 + arr[begin]
 end
-function reduce_along_max_central_gradient(data::AbstractAxisArray{T,2}, reduction::Function=slice, line_fineness=5) where T
+function reduce_along_max_central_gradient(data::AbstractAxisArray{T,2}, 
+        reduction::Function=slice, line_fineness=5) where T
     xs, ys = axes_keys(data)
     center_pt = [_midpoint(xs), _midpoint(ys)] 
     interpolation = interpolate(data, Gridded(Linear()))
-    
     neg_gradient_norm(coord) = -norm(Interpolations.gradient(interpolation, coord...))
     result_optim = optimize(neg_gradient_norm, [xs[begin], ys[begin]], 
                                                [xs[end], ys[end]], 

@@ -1,3 +1,78 @@
+using Dates
+
+function save_sweep_threshold(mdb_path, args...; 
+        unique_id="$(Dates.now())",
+        plots_subdir=plotsdir("sweep_threshold_$(unique_id)"),
+        kwargs...)
+    scene, _ = figure_sweep_threshold(mdb_path, args...; 
+                                      plots_subdir=plots_subdir,
+                                      kwargs...)
+    fname = "sweep_threshold_$(unique_id).png"
+    mkpath(plotsdir(plots_subdir))
+    save_name = plotsdir(plots_subdir, fname)
+    @info "saving $save_name"
+    Makie.save(save_name, scene)
+    return scene
+end
+
+function figure_sweep_threshold(args...; 
+                        scene_resolution=(600, 600), kwargs...)
+    scene, layout = layoutscene(resolution=scene_resolution)
+
+    layout[1,1] = plot_sweep_threshold!(scene, args...; kwargs...)
+
+    return (scene, layout)
+end
+
+function plot_sweep_threshold!(scene::Scene, mdb_path::String, 
+                        (x_sym, y_sym)::Tuple{Symbol,Symbol}, 
+                        threshold_sym::Symbol, 
+                        property_sym::Symbol; plots_subdir=nothing)
+    @assert threshold_sym == :blocking_θI
+    data = TravelingWaveSimulations.load_ExecutionClassifications(AbstractArray, mdb_path)[property_sym]
+
+    threshold_values = axes_keys(data)[dim(data, threshold_sym)]
+
+    fitted_sigmoids = map(threshold_values) do threshold_value
+        threshold_slice = data[blocking_θI=threshold_value]
+        single_threshold_data = _collapse_to_axes(threshold_slice, x_sym, y_sym)
+        if plots_subdir !== nothing
+            save_reduce_2d_and_steepest_line_and_histogram((x_sym, y_sym), single_threshold_data,
+                                property_sym, "$threshold_value", plots_subdir; facet_title="$threshold_value")
+        end
+        dists, vals, locs, lin = reduce_along_max_central_gradient(single_threshold_data, slice)
+        fit_sigmoid(vals, dists)
+    end
+
+    changes = map(x -> x.change, fitted_sigmoids)
+    slopes = map(x -> x.slope, fitted_sigmoids)
+    thresholds = map(x -> x.threshold, fitted_sigmoids)
+    errors = map(x -> x.slope, fitted_sigmoids)
+
+    layout = GridLayout()
+    layout[1,1] = changes_ax = LAxis(scene)
+    layout[1,2] = slopes_ax = LAxis(scene, title="slope")
+    layout[2,1] = thresholds_ax = LAxis(scene, title="threshold")
+    layout[2,2] = errors_ax = LAxis(scene)
+
+    plot!(changes_ax, threshold_values, changes)
+    plot!(slopes_ax, threshold_values, slopes)
+    plot!(thresholds_ax, threshold_values, thresholds)
+    plot!(errors_ax, threshold_values, errors)
+
+    return layout
+end
+
+
+
+
+
+
+
+
+
+
+
 
 function heatmap_sweep_with_target(sweep::AbstractArray,
 			target_mods_nt::NamedTuple{mod_names}, 

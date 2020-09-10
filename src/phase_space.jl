@@ -26,14 +26,20 @@ function reduce_2d_and_steepest_line_and_histogram!(scene::Scene,
                                                    (x_sym, y_sym)::Tuple{Symbol,Symbol},
                                                    fpath::String,
                                                    property_sym::Symbol; 
-                                                   facet_title, titlesize=20, hide_y=false,
-                                                   colorbar_width=nothing)
-    prototype_name, sim_params = read_params_from_data_path(fpath)
-    @show fpath
+                                                   kwargs...)
     whole_ensemble_data = TravelingWaveSimulations.load_ExecutionClassifications(AbstractArray, fpath)[property_sym]
-
     data = _collapse_to_axes(whole_ensemble_data, x_sym, y_sym)
+    reduce_2d_and_steepest_line_and_histogram!(scene, data, property_sym; kwargs...)
+end
 
+
+
+function reduce_2d_and_steepest_line_and_histogram!(
+                                scene::Scene, 
+                                data::AbstractArray,
+                                property_sym::Symbol; 
+                                facet_title, titlesize=20, hide_y=false,
+                                colorbar_width=nothing)
     layout = GridLayout()
 
     title_facet = LText(scene, facet_title, textsize=titlesize, tellwidth=false)
@@ -46,16 +52,33 @@ function reduce_2d_and_steepest_line_and_histogram!(scene::Scene,
     return layout
 end
 
+function save_reduce_2d_and_steepest_line_and_histogram((x_sym, y_sym),
+    fpath::String,
+    property_sym, 
+    suffix="", root_path=plotsdir(); scene_resolution=(300, 900), kwargs...)
+scene, layout = layoutscene(resolution=scene_resolution)
+layout[1,1] = reduce_2d_and_steepest_line_and_histogram!(scene,
+        (x_sym, y_sym),
+        fpath,
+        property_sym; kwargs...)
+fname = "reduce_2d_and_steepest_line_and_histogram_$(x_sym)_$(y_sym)$(length(suffix) > 0 ? "_$(suffix)" : "").png"
+mkpath(root_path)
+save_path = joinpath(root_path, fname)
+@info "saving $(save_path)"
+Makie.save(save_path, scene)
+end
 
-function save_reduce_2d_and_steepest_line_and_histogram!((x_sym, y_sym),
-        property_sym, 
-        unique_id=""; kwargs...)
-    scene, layout = layout, scene()
-    layout[1,1] = reduce_2d_and_steepest_line_and_histogram!(scene,
-            (x_sym, y_sym),
-            property_sym; kwargs...)
-    fname = "reduce_2d_and_steepest_line_and_histogram_$(x_sym)_$(y_sym).png"
-    mkpath(plotsdir(unique_id))
-    @info "saving $(plotsdir(unique_id,fname))"
-    Makie.save(plotsdir(unique_id,fname), scene)
+function save_reduce_2d_and_steepest_line_and_histogram((x_sym, y_sym),
+    data::AbstractArray,
+    property_sym, 
+    suffix="", root_path=plotsdir(); kwargs...)
+scene, layout = layoutscene()
+layout[1,1] = reduce_2d_and_steepest_line_and_histogram!(scene,
+        data,
+        property_sym; kwargs...)
+fname = "reduce_2d_and_steepest_line_and_histogram_$(x_sym)_$(y_sym)$(length(suffix) > 0 ? "_$(suffix)" : "").png"
+mkpath(root_path)
+save_path = joinpath(root_path, fname)
+@info "saving $(save_path)"
+Makie.save(save_path, scene)
 end
