@@ -1,13 +1,11 @@
 using TravelingWaveSimulationsPlotting, TravelingWaveSimulations, StaticArrays
 
-fcmb_monotonic_A_fpath = get_recent_simulation_data_path(joinpath(homedir(), "data", "ring_monotonic", "report2_A_sweep"))
-fcmb_blocking_A_fpath = get_recent_simulation_data_path(joinpath(homedir(), "data", "ring_blocking", "report2_A_sweep"))
+threshold_sweep_monotonic_A_fpath = get_recent_simulation_data_path(joinpath(homedir(), "data", "ring_blocking", "depblock_A"), -1)
+@show threshold_sweep_monotonic_A_fpath
 
-fcmb_monotonic_S_fpath = get_recent_simulation_data_path(joinpath(homedir(), "data", "ring_monotonic", "report2_S_sweep"))
-fcmb_blocking_S_fpath = get_recent_simulation_data_path(joinpath(homedir(), "data", "ring_blocking", "report2_S_sweep"))
 
 # Definitely propagating
-save_figure_example_contrast_monotonic_blocking_all((:Aei, :Aee), (:Aie, :Aii), [
+save_threshold_sweep((:Aei, :Aee), (:Aie, :Aii), [
                           (Aee=200.0, Aei=50.0, Aii=200, Aie=50.0),
                           (Aee=150.0, Aei=150.0, Aii=50, Aie=115.0),
                           (Aee=50.0, Aei=200.0, Aii=200, Aie=50.0)
