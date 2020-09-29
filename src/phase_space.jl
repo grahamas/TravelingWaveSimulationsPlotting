@@ -71,8 +71,8 @@ end
 function save_reduce_2d_and_steepest_line_and_histogram((x_sym, y_sym),
     data::AbstractArray,
     property_sym, 
-    suffix="", root_path=plotsdir(); kwargs...)
-scene, layout = layoutscene()
+    suffix="", root_path=plotsdir(); scene_resolution=(300, 900), kwargs...)
+scene, layout = layoutscene(resolution=scene_resolution)
 layout[1,1] = reduce_2d_and_steepest_line_and_histogram!(scene,
         data,
         property_sym; kwargs...)

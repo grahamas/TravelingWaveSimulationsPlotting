@@ -18,9 +18,15 @@ line_dist_to_coord(dist, line, origin) = (dist * line) + origin
 
 struct PointVectorLine{N,T,S<:SVector{N,T}}
     point::S
-    vector::S
+    vector::S  # FIXME should have special vertical and horizontal lines and/or insist norm(vector) != 0
 end
-slope(line::PointVectorLine{2}) = line.vector[2] / line.vector[1]
+function slope(line::PointVectorLine{2})
+    if any(line.vector .== 0.0) # FIXME can't be vertical; shouldn't be allowed
+        return 0.0
+    else
+        return line.vector[2] / line.vector[1]
+    end
+end
 # the point where line takes value val in dim dimension
 function point_from_dim_val(line::PointVectorLine, val::Number, dim::Int)
     scale = (val - line.point[dim]) / line.vector[dim]
@@ -34,8 +40,14 @@ point_from_distance(line::PointVectorLine, dist::Number) = line.vector .* dist .
 get_orthogonal_vector(line::PointVectorLine) = -SA[line.vector[2], -line.vector[1]]
 
 function originate_from_left(line, xs, ys)
+    
     x_min, x_max = extrema(xs)
     y_min, y_max = extrema(ys)
+    if all(line.vector .== 0.0)
+        return PointVectorLine(SA[x_min, line.point[2]], SA[1.0, 0.0])
+    elseif line.vector[1] == 0.0
+        return PointVectorLine(SA[line.point[1], y_min], SA[0.0, 1.0])
+    end
 
     # need increasing x
     new_vector = line.vector[1] > 0 ? line.vector : -line.vector

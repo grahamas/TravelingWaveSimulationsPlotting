@@ -73,11 +73,11 @@ function reduce_along_max_central_gradient(data::AbstractAxisArray{T,2},
                                                [xs[end], ys[end]], 
                                                center_pt, 
                                                Fminbox(GradientDescent()); 
-                                               autodiff=:forward)
+                                               )#autodiff=:forward)
     max_grad_coord = Optim.minimizer(result_optim)
     max_grad = Interpolations.gradient(interpolation, max_grad_coord...)
+
     max_grad_line = PointVectorLine(SA[max_grad_coord...], max_grad)
-    @show string(reduction)
     return reduction(interpolation, max_grad_line, xs, ys, line_fineness)
 end
 
