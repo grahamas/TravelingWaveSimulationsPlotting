@@ -2,7 +2,7 @@ module TravelingWaveSimulationsPlotting
 
 using DrWatson
 
-using MakieLayout, Makie
+using Makie, AbstractPlotting, AbstractPlotting.MakieLayout
 using TravelingWaveSimulations, Simulation73, NeuralModels, Simulation73Plotting
 using Interpolations, DiffEqOperators, Optim, LinearAlgebra
 using AxisIndices

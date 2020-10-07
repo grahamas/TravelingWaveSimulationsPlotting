@@ -11,10 +11,10 @@ function plot_binary_segmentation!(scene::Scene, data)
     return segmented_ax
 end
 
-function get_content(layout, rows, cols, side = MakieLayout.GridLayoutBase.Inner())
+function get_content(layout, rows, cols, side = AbstractPlotting.MakieLayout.GridLayoutBase.Inner())
 
-    span = MakieLayout.GridLayoutBase.Span(
-        MakieLayout.GridLayoutBase.to_ranges(layout, rows, cols)...
+    span = AbstractPlotting.MakieLayout.GridLayoutBase.Span(
+        AbstractPlotting.MakieLayout.GridLayoutBase.to_ranges(layout, rows, cols)...
     )
 
     only(filter(layout.content) do c

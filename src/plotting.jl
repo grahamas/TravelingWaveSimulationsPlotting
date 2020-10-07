@@ -50,10 +50,10 @@ function plot_sweep_threshold!(scene::Scene, mdb_path::String,
     errors = map(x -> x.slope, fitted_sigmoids)
 
     layout = GridLayout()
-    layout[1,1] = changes_ax = LAxis(scene)
+    layout[1,1] = changes_ax = LAxis(scene, title="boundaries delta")
     layout[1,2] = slopes_ax = LAxis(scene, title="slope")
     layout[2,1] = thresholds_ax = LAxis(scene, title="threshold")
-    layout[2,2] = errors_ax = LAxis(scene)
+    layout[2,2] = errors_ax = LAxis(scene, title="error")
 
     plot!(changes_ax, threshold_values, changes)
     plot!(slopes_ax, threshold_values, slopes)
