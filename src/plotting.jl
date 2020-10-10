@@ -53,15 +53,18 @@ function plot_metasweep!(scene::Scene, mdb_path::String,
 
     fitted_sigmoids_and_threshold_locs = map(metasweep_value_pairs) do metasweep_value_pair
         metasweep_slice = getindex_metasweep_dim(data, metasweep_value_pair)
-        flattened_metasweep_slice = _collapse_to_axes(metasweep_slice, x_sym, y_sym)
+        # flattened_metasweep_slice = _collapse_to_axes(metasweep_slice, x_sym, y_sym)
         # if plots_subdir !== nothing
             # save_reduce_2d_and_steepest_line_and_histogram((x_sym, y_sym), flattened_metasweep_slice,
                     # property_sym, "$metasweep_value_pair", plots_subdir; facet_title="$metasweep_value_pair")
         # end
-        dists, vals, locs, lin = reduce_normal_to_halfmax_contour(flattened_metasweep_slice, slice)
-        fitted_sigmoid = fit_sigmoid(vals, dists)
-        threshold_loc = point_from_distance(lin, fitted_sigmoid.threshold)
-        return (fitted_sigmoid, threshold_loc)
+        phase_space_fitted_sigmoid = bootstrap_sigmoid_fit(metasweep_slice, x_sym, y_sym) do subsampled0_slice
+            flattened_subsampled_slice = _collapse_to_axes(subsampled_slice, x_sym, y_sym)
+            dists, vals, locs, lin = reduce_normal_to_halfmax_contour(flattened_subsampled_slice, slice)
+            fitted_sigmoid = fit_sigmoid(vals, dists)
+            phase_space_sigmoid = SigmoidOnSlice(fitted_sigmoid, lin)
+        end
+        return phase_space_fitted_sigmoid
     end
     fitted_sigmoids = [a[1] for a in fitted_sigmoids_and_threshold_locs]
     threshold_locs = [a[2] for a in fitted_sigmoids_and_threshold_locs]
@@ -86,6 +89,27 @@ function plot_metasweep!(scene::Scene, mdb_path::String,
     layout[3,2] = y_thresholds_layout = metasweep_plot!(scene, metasweep_values, y_threshold_locs, title="$y_sym θ")
 
     return layout
+end
+
+# offset - A sigmoid(-a (x - theta))
+# where x is distance along PointVectorLine(θ, φ)
+struct SigmoidOnSlice{T}
+    offset::T
+    A::T
+    a::T
+    θ::NTuple{T,2}
+    φ::NTuple{T,2}
+    error::T
+end
+function SigmoidOnSlice(sig::FittedSigmoid{T}, lin::PointVectorLine)
+    SigmoidOnSlice{T}(
+        sig.left_val,
+        sig.change,
+        sig.slope,
+        point_from_distance(lin, sig.threshold),
+        Tuple(lin.vector),
+        sig.error
+    )
 end
 
 
