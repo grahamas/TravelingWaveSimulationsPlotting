@@ -11,10 +11,10 @@ function plot_binary_segmentation!(scene::Scene, data)
     return segmented_ax
 end
 
-function get_content(layout, rows, cols, side = AbstractPlotting.MakieLayout.GridLayoutBase.Inner())
+function get_content(layout, rows, cols, side = MakieLayout.GridLayoutBase.Inner())
 
-    span = AbstractPlotting.MakieLayout.GridLayoutBase.Span(
-        AbstractPlotting.MakieLayout.GridLayoutBase.to_ranges(layout, rows, cols)...
+    span = MakieLayout.GridLayoutBase.Span(
+        MakieLayout.GridLayoutBase.to_ranges(layout, rows, cols)...
     )
 
     only(filter(layout.content) do c
@@ -44,7 +44,10 @@ function reduce_2d_and_steepest_line_and_histogram!(
 
     title_facet = LText(scene, facet_title, textsize=titlesize, tellwidth=false)
     sweep_sublayout = axisarray_heatmap!(scene, data, colorbar_width)
-    reduction_sublayout = plot_max_gradient!(scene, slice, data, get_content(sweep_sublayout, 1, 1))
+    reduction_sublayout = plot_reduction!(scene, slice, data, get_content(sweep_sublayout, 1, 1))
+    if isnothing(reduction_sublayout)
+        reduction_sublayout = LAxis(scene)
+    end
     segmented_ax = plot_binary_segmentation!(scene, data)
 
     layout[:v] = [title_facet, sweep_sublayout, reduction_sublayout, segmented_ax]
@@ -53,32 +56,32 @@ function reduce_2d_and_steepest_line_and_histogram!(
 end
 
 function save_reduce_2d_and_steepest_line_and_histogram((x_sym, y_sym),
-    fpath::String,
-    property_sym, 
-    suffix="", root_path=plotsdir(); scene_resolution=(300, 900), kwargs...)
-scene, layout = layoutscene(resolution=scene_resolution)
-layout[1,1] = reduce_2d_and_steepest_line_and_histogram!(scene,
-        (x_sym, y_sym),
-        fpath,
-        property_sym; kwargs...)
-fname = "reduce_2d_and_steepest_line_and_histogram_$(x_sym)_$(y_sym)$(length(suffix) > 0 ? "_$(suffix)" : "").png"
-mkpath(root_path)
-save_path = joinpath(root_path, fname)
-@info "saving $(save_path)"
-Makie.save(save_path, scene)
+        fpath::String,
+        property_sym, 
+        suffix="", root_path=plotsdir(); scene_resolution=(300, 900), kwargs...)
+    scene, layout = layoutscene(resolution=scene_resolution)
+    layout[1,1] = reduce_2d_and_steepest_line_and_histogram!(scene,
+            (x_sym, y_sym),
+            fpath,
+            property_sym; kwargs...)
+    fname = "reduce_2d_and_steepest_line_and_histogram_$(x_sym)_$(y_sym)$(length(suffix) > 0 ? "_$(suffix)" : "").png"
+    mkpath(root_path)
+    save_path = joinpath(root_path, fname)
+    @info "saving $(save_path)"
+    Makie.save(save_path, scene)
 end
 
 function save_reduce_2d_and_steepest_line_and_histogram((x_sym, y_sym),
-    data::AbstractArray,
-    property_sym, 
-    suffix="", root_path=plotsdir(); scene_resolution=(300, 900), kwargs...)
-scene, layout = layoutscene(resolution=scene_resolution)
-layout[1,1] = reduce_2d_and_steepest_line_and_histogram!(scene,
-        data,
-        property_sym; kwargs...)
-fname = "reduce_2d_and_steepest_line_and_histogram_$(x_sym)_$(y_sym)$(length(suffix) > 0 ? "_$(suffix)" : "").png"
-mkpath(root_path)
-save_path = joinpath(root_path, fname)
-@info "saving $(save_path)"
-Makie.save(save_path, scene)
+        data::AbstractArray,
+        property_sym, 
+        suffix="", root_path=plotsdir(); scene_resolution=(300, 900), kwargs...)
+    scene, layout = layoutscene(resolution=scene_resolution)
+    layout[1,1] = reduce_2d_and_steepest_line_and_histogram!(scene,
+            data,
+            property_sym; kwargs...)
+    fname = "reduce_2d_and_steepest_line_and_histogram_$(x_sym)_$(y_sym)$(length(suffix) > 0 ? "_$(suffix)" : "").png"
+    mkpath(root_path)
+    save_path = joinpath(root_path, fname)
+    @info "saving $(save_path)"
+    Makie.save(save_path, scene)
 end
