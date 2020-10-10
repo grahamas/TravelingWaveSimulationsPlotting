@@ -37,6 +37,7 @@ y_from_x(line::PointVectorLine{2}, x::Number) = point_from_dim_val(line, x, 1)[2
 y_intercept(line::PointVectorLine{2}) = y_from_x(line, 0.0)
 x_intercept(line::PointVectorLine{2}) = x_from_y(line, 0.0) 
 point_from_distance(line::PointVectorLine, dist::Number) = line.vector .* dist .+ line.point
+point_from_distance(::Any, ::Missing) = missing
 get_orthogonal_vector(line::PointVectorLine) = -SA[line.vector[2], -line.vector[1]]
 
 function originate_from_left(line, xs, ys)

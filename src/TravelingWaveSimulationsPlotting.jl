@@ -2,11 +2,15 @@ module TravelingWaveSimulationsPlotting
 
 using DrWatson
 
-using Makie, AbstractPlotting, AbstractPlotting.MakieLayout
+using Makie
+using AbstractPlotting: MakieLayout
+using AbstractPlotting.MakieLayout
 using TravelingWaveSimulations, Simulation73, NeuralModels, Simulation73Plotting
 using Interpolations, DiffEqOperators, Optim, LinearAlgebra
 using AxisIndices
 using StaticArrays
+using Contour: contour, lines, coordinates
+using IterTools: product
 
 include("util/axisarray.jl")
 include("util/lines.jl")
@@ -21,7 +25,7 @@ export heatmap_sweep_with_target, axisarray_heatmap!,
     figure_contrast_monotonic_blocking_all, 
     figure_example_contrast_monotonic_blocking_all,
     save_figure_example_contrast_monotonic_blocking_all,
-    save_sweep_threshold
+    save_metasweep
 include("plot_axisarray.jl")
 
 end # module

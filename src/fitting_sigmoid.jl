@@ -5,9 +5,11 @@ struct FittedSigmoid{T}
     threshold::T
     error::T
 end
+FittedSigmoid(::Missing) = FittedSigmoid{Missing}(missing, missing, missing, missing, missing)
 
 (s::FittedSigmoid)(x) = s.left_val .+ s.change .* NeuralModels.simple_sigmoid_fn(x, s.slope, s.threshold)
 
+fit_sigmoid(::Nothing, ::Nothing) = FittedSigmoid(missing)
 function fit_sigmoid(ys, xs)
     # fits sigmoid that goes from 0 to 1
     if xs[end] < xs[begin]

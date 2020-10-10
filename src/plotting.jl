@@ -1,13 +1,13 @@
 using Dates
 
-function save_sweep_threshold(mdb_path, args...; 
+function save_metasweep(mdb_path, args...; 
         unique_id="$(Dates.now())",
-        plots_subdir=plotsdir("sweep_threshold_$(unique_id)"),
+        plots_subdir=plotsdir("metasweep_$(unique_id)"),
         kwargs...)
-    scene, _ = figure_sweep_threshold(mdb_path, args...; 
+    scene, _ = figure_metasweep(mdb_path, args...; 
                                       plots_subdir=plots_subdir,
                                       kwargs...)
-    fname = "sweep_threshold_$(unique_id).png"
+    fname = "metasweep_$(unique_id).png"
     mkpath(plotsdir(plots_subdir))
     save_name = plotsdir(plots_subdir, fname)
     @info "saving $save_name"
@@ -15,55 +15,202 @@ function save_sweep_threshold(mdb_path, args...;
     return scene
 end
 
-function figure_sweep_threshold(args...; 
+function figure_metasweep(args...; 
                         scene_resolution=(600, 600), kwargs...)
     scene, layout = layoutscene(resolution=scene_resolution)
 
-    layout[1,1] = plot_sweep_threshold!(scene, args...; kwargs...)
+    layout[1,1] = plot_metasweep!(scene, args...; kwargs...)
 
     return (scene, layout)
 end
 
-function plot_sweep_threshold!(scene::Scene, mdb_path::String, 
-                        (x_sym, y_sym)::Tuple{Symbol,Symbol}, 
-                        threshold_sym::Symbol, 
-                        property_sym::Symbol; plots_subdir=nothing)
-    @assert threshold_sym == :blocking_θI
+# function plot_sweep_threshold!(scene::Scene, mdb_path::String, 
+#                         (x_sym, y_sym)::Tuple{Symbol,Symbol}, 
+#                         threshold_sym::Symbol, 
+#                         property_sym::Symbol; plots_subdir=nothing)
+#     @assert threshold_sym == :blocking_θI
+#     data = TravelingWaveSimulations.load_ExecutionClassifications(AbstractArray, mdb_path)[property_sym]
+
+#     dep_block_threshold_values = axes_keys(data)[dim(data, threshold_sym)]
+
+#     (xs, ys) = axes_keys(_collapse_to_axes(data[blocking_θI=dep_block_threshold_values[begin]], x_sym, y_sym))
+
+#     fitted_sigmoids_and_threshold_locs = map(dep_block_threshold_values) do dep_block_threshold_value
+#         threshold_slice = data[blocking_θI=dep_block_threshold_value]
+#         single_threshold_data = _collapse_to_axes(threshold_slice, x_sym, y_sym)
+#         if plots_subdir !== nothing
+#             save_reduce_2d_and_steepest_line_and_histogram((x_sym, y_sym), single_threshold_data,
+#                                 property_sym, "$dep_block_threshold_value", plots_subdir; facet_title="$dep_block_threshold_value")
+#         end
+#         dists, vals, locs, lin = reduce_normal_to_halfmax_contour(single_threshold_data, slice)
+#         fitted_sigmoid = fit_sigmoid(vals, dists)
+#         threshold_loc = point_from_distance(lin, fitted_sigmoid.threshold)
+#         return (fitted_sigmoid, threshold_loc)
+#     end
+#     fitted_sigmoids = [a[1] for a in fitted_sigmoids_and_threshold_locs]
+#     threshold_locs = [a[2] for a in fitted_sigmoids_and_threshold_locs]
+
+#     changes = map(x -> x.change, fitted_sigmoids)
+#     if all(ismissing.(changes))
+#         error("no sigmoids fit")
+#     end
+#     slopes = map(x -> x.slope, fitted_sigmoids)
+#     thresholds = map(x -> x.threshold, fitted_sigmoids)
+#     errors = map(x -> x.error, fitted_sigmoids)
+
+#     set_theme!(LAxis=(textsize=5,), LText=(tellwidth=false, tellheight=false))
+#     layout = GridLayout(resolution=(1200,1200))
+#     layout[1,1] = changes_ax = LAxis(scene, title="boundaries delta")
+#     layout[1,2] = slopes_ax = LAxis(scene, title="slope")
+#     layout[2,1] = thresholds_layout = GridLayout()
+#     thresholds_layout[1,1] = thresholds_ax = LAxis(scene, title="threshold")
+#     layout[2,2] = errors_ax = LAxis(scene, title="error")
+#     layout[3,1] = LText(scene, "$x_sym", tellwidth=false, tellheight=true)
+#     layout[3,2] = LText(scene, "dep. block threshold")
+    
+#     plot!(changes_ax, dep_block_threshold_values, changes, textsize=10)
+#     plot!(slopes_ax, dep_block_threshold_values, slopes)
+#     #plot!(thresholds_ax, dep_block_threshold_values, thresholds)
+#     thresholds_scatter = scatter!(thresholds_ax, threshold_locs, color=dep_block_threshold_values)
+#     xlims!(thresholds_ax, [xs[begin],xs[end]])
+#     ylims!(thresholds_ax, [ys[begin], ys[end]])
+#     thresholds_layout[1,2] = LColorbar(scene, thresholds_scatter, width=20)
+#     plot!(errors_ax, dep_block_threshold_values, errors)
+
+#     return layout
+# end
+
+function plot_metasweep!(scene::Scene, mdb_path::String, 
+        (x_sym, y_sym)::Tuple{Symbol,Symbol}, 
+        metasweep_sym::Symbol, 
+        property_sym::Symbol; plots_subdir=nothing)
     data = TravelingWaveSimulations.load_ExecutionClassifications(AbstractArray, mdb_path)[property_sym]
 
-    threshold_values = axes_keys(data)[dim(data, threshold_sym)]
+    dep_block_threshold_values = axes_keys(data)[dim(data, metasweep_sym)]
+    getindex_metasweep_dim(arr, idx) = getindex(arr; Dict(metasweep_sym => idx)...)
 
-    fitted_sigmoids = map(threshold_values) do threshold_value
-        threshold_slice = data[blocking_θI=threshold_value]
+    (xs, ys) = axes_keys(_collapse_to_axes(getindex_metasweep_dim(data, dep_block_threshold_values[begin]), x_sym, y_sym))
+
+    fitted_sigmoids_and_threshold_locs = map(dep_block_threshold_values) do dep_block_threshold_value
+        threshold_slice = getindex_metasweep_dim(data, dep_block_threshold_value)
         single_threshold_data = _collapse_to_axes(threshold_slice, x_sym, y_sym)
         if plots_subdir !== nothing
             save_reduce_2d_and_steepest_line_and_histogram((x_sym, y_sym), single_threshold_data,
-                                property_sym, "$threshold_value", plots_subdir; facet_title="$threshold_value")
+                    property_sym, "$dep_block_threshold_value", plots_subdir; facet_title="$dep_block_threshold_value")
         end
-        dists, vals, locs, lin = reduce_along_max_central_gradient(single_threshold_data, slice)
-        fit_sigmoid(vals, dists)
+        dists, vals, locs, lin = reduce_normal_to_halfmax_contour(single_threshold_data, slice)
+        fitted_sigmoid = fit_sigmoid(vals, dists)
+        threshold_loc = point_from_distance(lin, fitted_sigmoid.threshold)
+        return (fitted_sigmoid, threshold_loc)
     end
+    fitted_sigmoids = [a[1] for a in fitted_sigmoids_and_threshold_locs]
+    threshold_locs = [a[2] for a in fitted_sigmoids_and_threshold_locs]
 
     changes = map(x -> x.change, fitted_sigmoids)
+    if all(ismissing.(changes))
+    error("no sigmoids fit")
+    end
     slopes = map(x -> x.slope, fitted_sigmoids)
     thresholds = map(x -> x.threshold, fitted_sigmoids)
-    errors = map(x -> x.slope, fitted_sigmoids)
+    errors = map(x -> x.error, fitted_sigmoids)
 
-    layout = GridLayout()
+    set_theme!(LAxis=(textsize=5,), LText=(tellwidth=false, tellheight=false))
+    layout = GridLayout(resolution=(1200,1200))
     layout[1,1] = changes_ax = LAxis(scene, title="boundaries delta")
     layout[1,2] = slopes_ax = LAxis(scene, title="slope")
-    layout[2,1] = thresholds_ax = LAxis(scene, title="threshold")
+    layout[2,1] = thresholds_layout = GridLayout()
+    thresholds_layout[1,1] = thresholds_ax = LAxis(scene, title="threshold")
     layout[2,2] = errors_ax = LAxis(scene, title="error")
+    layout[3,1] = LText(scene, "$x_sym", tellwidth=false, tellheight=true)
+    layout[3,2] = LText(scene, "dep. block threshold")
 
-    plot!(changes_ax, threshold_values, changes)
-    plot!(slopes_ax, threshold_values, slopes)
-    plot!(thresholds_ax, threshold_values, thresholds)
-    plot!(errors_ax, threshold_values, errors)
+    plot!(changes_ax, dep_block_threshold_values, changes, textsize=10)
+    plot!(slopes_ax, dep_block_threshold_values, slopes)
+    #plot!(thresholds_ax, dep_block_threshold_values, thresholds)
+    thresholds_scatter = scatter!(thresholds_ax, threshold_locs, color=dep_block_threshold_values)
+    xlims!(thresholds_ax, [xs[begin],xs[end]])
+    ylims!(thresholds_ax, [ys[begin], ys[end]])
+    thresholds_layout[1,2] = LColorbar(scene, thresholds_scatter, width=20)
+    plot!(errors_ax, dep_block_threshold_values, errors)
 
     return layout
 end
 
+function heatmap_with_colorbar!(scene::Scene, args...; title="", kwargs...)
+    layout = GridLayout()
+    layout[1,1] = ax = LAxis(scene, title=title)
+    plt = heatmap!(ax, args...; kwargs...)
+    tightlimits!(ax)
+    layout[1,2] = LColorbar(scene, plt, width=20)
+    return layout
+end
 
+function plot_metasweep!(scene::Scene, mdb_path::String, 
+        (x_sym, y_sym)::Tuple{Symbol,Symbol}, 
+        metasweep_syms::Tuple{Symbol,Symbol}, 
+        property_sym::Symbol; plots_subdir=nothing)
+    data = TravelingWaveSimulations.load_ExecutionClassifications(AbstractArray, mdb_path)[property_sym]
+
+    metasweep_values = map(sym -> axes_keys(data)[dim(data, sym)], metasweep_syms)
+    metasweep_value_pairs = product(metasweep_values...)
+    getindex_metasweep_dim(arr, idxs) = getindex(arr; Dict(sym => idx for (sym, idx) in zip(metasweep_syms, idxs))...)
+
+    (xs, ys) = axes_keys(_collapse_to_axes(getindex_metasweep_dim(data, first(metasweep_value_pairs)), x_sym, y_sym))
+    @show axes(data)
+    @show xs
+    @show ys
+    @show y_sym
+    
+
+    @show size(metasweep_value_pairs)
+    fitted_sigmoids_and_threshold_locs = map(metasweep_value_pairs) do metasweep_value_pair
+        metasweep_slice = getindex_metasweep_dim(data, metasweep_value_pair)
+        flattened_metasweep_slice = _collapse_to_axes(metasweep_slice, x_sym, y_sym)
+        # if plots_subdir !== nothing
+            # save_reduce_2d_and_steepest_line_and_histogram((x_sym, y_sym), flattened_metasweep_slice,
+                    # property_sym, "$metasweep_value_pair", plots_subdir; facet_title="$metasweep_value_pair")
+        # end
+        dists, vals, locs, lin = reduce_normal_to_halfmax_contour(flattened_metasweep_slice, slice)
+        fitted_sigmoid = fit_sigmoid(vals, dists)
+        threshold_loc = point_from_distance(lin, fitted_sigmoid.threshold)
+        return (fitted_sigmoid, threshold_loc)
+    end
+    @show size(fitted_sigmoids_and_threshold_locs)
+    fitted_sigmoids = [a[1] for a in fitted_sigmoids_and_threshold_locs]
+    @show size(fitted_sigmoids)
+    threshold_locs = [a[2] for a in fitted_sigmoids_and_threshold_locs]
+
+    ifnonmissing(x)::Float64 = ismissing(x) ? NaN64 : x
+    changes = map(x -> x.change |> ifnonmissing, fitted_sigmoids)
+    if all(isnan.(changes))
+        error("no sigmoids fit")
+    end
+    slopes = map(x -> x.slope |> ifnonmissing, fitted_sigmoids)
+    thresholds = map(x -> x.threshold |> ifnonmissing, fitted_sigmoids)
+    x_threshold_locs = [ismissing(a) ? NaN : a[1] for a in threshold_locs]
+    y_threshold_locs = [ismissing(a) ? NaN : a[2] for a in threshold_locs]
+    errors = map(x -> x.error |> ifnonmissing, fitted_sigmoids)
+
+    set_theme!(LAxis=(textsize=5,), LText=(tellwidth=false, tellheight=false))
+    layout = GridLayout(resolution=(1200,1200))
+    layout[1,1] = changes_layout = heatmap_with_colorbar!(scene, metasweep_values[1], metasweep_values[2], changes, title="boundaries delta")
+    layout[1,2] = slopes_layout = heatmap_with_colorbar!(scene, metasweep_values[1], metasweep_values[2], slopes, title="slopes")
+    #layout[2,1] = thresholds_layout = GridLayout()
+    layout[2,2] = errors_layout = heatmap_with_colorbar!(scene, metasweep_values[1], metasweep_values[2], errors, title="errors")
+    layout[3,1] = x_thresholds_layout = heatmap_with_colorbar!(scene, metasweep_values[1], metasweep_values[2], x_threshold_locs, title="$x_sym θ")
+    layout[3,2] = y_thresholds_layout = heatmap_with_colorbar!(scene, metasweep_values[1], metasweep_values[2], y_threshold_locs, title="$y_sym θ")
+    
+    # heatmap!(changes_ax, changes, textsize=10)
+    # heatmap!(slopes_ax, slopes)
+    # #heatmap!(thresholds_ax, metasweep_values[1], metasweep_values[2], thresholds)
+    # thresholds_scatter = scatter!(thresholds_ax, threshold_locs, color=dep_block_threshold_values)
+    # xlims!(thresholds_ax, [xs[begin],xs[end]])
+    # ylims!(thresholds_ax, [ys[begin], ys[end]])
+    # thresholds_layout[1,2] = LColorbar(scene, thresholds_scatter, width=20)
+    # heatmap!(errors_ax, errors)
+
+    return layout
+end
 
 
 

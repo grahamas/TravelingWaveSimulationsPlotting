@@ -61,6 +61,7 @@ function _midpoint(arr::AbstractArray)
     @assert arr[begin] < arr[end]
     return (arr[end] - arr[begin]) / 2 + arr[begin]
 end
+reduce_along_max_central_gradient(data::NamedAxisArray, args...) = reduce_along_max_central_gradient(data.data, args...)
 function reduce_along_max_central_gradient(data::AbstractAxisArray{T,2}, 
         reduction::Function=slice, line_fineness=5) where T
     xs, ys = axes_keys(data)
@@ -81,9 +82,40 @@ function reduce_along_max_central_gradient(data::AbstractAxisArray{T,2},
     return reduction(interpolation, max_grad_line, xs, ys, line_fineness)
 end
 
+reduce_normal_to_halfmax_contour(data::NamedAxisArray, args...) = reduce_normal_to_halfmax_contour(data.data, args...)
+function reduce_normal_to_halfmax_contour(data::AbstractAxisArray{T,2}, 
+        reduction::Function=slice, line_fineness=5) where T
+    xs, ys = axes_keys(data)
+    center_pt = (_midpoint(xs), _midpoint(ys))
+    interpolation = interpolate(data, Gridded(Linear()))
+
+    halfmax_contour_lines = lines(contour(xs, ys, data, 0.5))
+    if length(halfmax_contour_lines) == 0
+        return (nothing, nothing, nothing, nothing)
+    elseif length(halfmax_contour_lines) > 1
+        @warn "Found multiple disconnected contours at level = 0.5: $(length.(coordinates.(halfmax_contour_lines)))"
+        return (nothing, nothing, nothing, nothing)
+
+    end
+    contour_points = zip(coordinates(only(halfmax_contour_lines))...) |> collect
+    nearby = max(min(div(length(contour_points), 4), 20), 1)
+    @assert nearby > 0 "len_contour = $(length(contour_points))"
+    if length(contour_points) < 2nearby + 1
+        @warn "contour too small"
+        return (nothing, nothing, contour_points, nothing)
+    end
+    cp_center_dx = argmin(map(pt -> norm(pt .- center_pt), contour_points))
+    cp_center_pt = contour_points[cp_center_dx]
+
+    nearby_gradients = contour_points[cp_center_dx-nearby:cp_center_dx+nearby] .|> pt -> Interpolations.gradient.(Ref(interpolation), pt...)
+    resultant_gradient = sum(nearby_gradients)
+
+    resultant_gradient_line = PointVectorLine(SA[cp_center_pt...], resultant_gradient)
+    return reduction(interpolation, resultant_gradient_line, xs, ys, line_fineness)
+end
+
 squish(data::NamedAxisArray, args...) = squish(data.data, args...)
 slice(data::NamedAxisArray, args...) = slice(data.data, args...)
-reduce_along_max_central_gradient(data::NamedAxisArray, args...) = reduce_along_max_central_gradient(data.data, args...)
 
 function draw_reduced_locations!(ax::Nothing, locs)
     @warn "no heatmap provided to inscribe reduction"
@@ -94,19 +126,22 @@ function draw_reduced_locations!(ax::LAxis, locs)
     plot!(ax, xs, ys, color=:red)
 end
 
-function plot_max_gradient!(scene::Scene, 
+function plot_reduction!(scene::Scene, 
                             reducing_fn::Union{typeof(slice), typeof(squish)},
                             data,
                             heatmap_ax::Union{Nothing,LAxis}=nothing)
-    max_grad_layout = GridLayout()
-    dists, vals, locs, line = reduce_along_max_central_gradient(data, slice)
-    max_grad_ax = LAxis(scene)
-    plot!(max_grad_ax, dists, vals)
+    reduction_layout = GridLayout()
+    dists, vals, locs, line = reduce_normal_to_halfmax_contour(data, reducing_fn)
+    if isnothing(dists)
+        return nothing
+    end
+    reduction_ax = LAxis(scene)
+    plot!(reduction_ax, dists, vals)
     draw_reduced_locations!(heatmap_ax, locs)
     fitted_sigmoid = fit_sigmoid(vals, dists)
-    max_grad_title = if fitted_sigmoid != nothing
+    reduction_title = if fitted_sigmoid != nothing
         sigmoid_val = fitted_sigmoid.(dists)
-        plot!(max_grad_ax, dists, sigmoid_val, color=:green) 
+        plot!(reduction_ax, dists, sigmoid_val, color=:green) 
         LText(scene, 
             "a=$(round(fitted_sigmoid.slope,sigdigits=3)); θ=$(round.(point_from_distance(line, 
                         fitted_sigmoid.threshold),sigdigits=3))", 
@@ -114,13 +149,13 @@ function plot_max_gradient!(scene::Scene,
     else
         LText(scene, "no fit", tellwidth=false)
     end
-    max_grad_ax.xticks = ([dists[begin], dists[end]], 
+    reduction_ax.xticks = ([dists[begin], dists[end]], 
                                 string.([floor.(Ref(Int), locs[begin]), 
                                          floor.(Int, locs[end])]))
-    #tightlimits!(max_grad_ax)
-    ylims!(max_grad_ax, 0, 1)
-    max_grad_layout[:v] = [max_grad_title, max_grad_ax]
-    return max_grad_layout
+    #tightlimits!(reduction_ax)
+    ylims!(reduction_ax, 0, 1)
+    reduction_layout[:v] = [reduction_title, reduction_ax]
+    return reduction_layout
 end
 
 # FIXME needs better home
