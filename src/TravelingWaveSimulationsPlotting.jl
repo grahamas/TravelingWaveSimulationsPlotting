@@ -14,7 +14,10 @@ using IterTools: product
 
 include("util/axisarray.jl")
 include("util/lines.jl")
-export PointVectorLine
+include("util/bootstrap.jl")
+export PointVectorLine, Bootstrapped, Estimated
+using StatsBase: sample
+using Statistics: std
 
 include("space_reduction.jl")
 include("fitting_sigmoid.jl")

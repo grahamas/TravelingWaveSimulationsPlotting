@@ -1,5 +1,7 @@
 using TravelingWaveSimulationsPlotting, TravelingWaveSimulations, StaticArrays
 
+# Generate figure of a connectivity sweep with examples
+
 threshold_sweep_monotonic_A_fpath = get_recent_simulation_data_path(joinpath(homedir(), "data", "ring_blocking", "depblock_A"), -1)
 @show threshold_sweep_monotonic_A_fpath
 

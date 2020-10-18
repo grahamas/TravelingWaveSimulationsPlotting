@@ -19,6 +19,10 @@ line_dist_to_coord(dist, line, origin) = (dist * line) + origin
 struct PointVectorLine{N,T,S<:SVector{N,T}}
     point::S
     vector::S  # FIXME should have special vertical and horizontal lines and/or insist norm(vector) != 0
+    PointVectorLine(point::S,vector::S) where {N,T,S<:SVector{N,T}} = begin
+        @assert any(abs.(vector) .> sqrt(eps(T)))
+        new{N,T,S}(point,vector)
+    end
 end
 function slope(line::PointVectorLine{2})
     if any(line.vector .== 0.0) # FIXME can't be vertical; shouldn't be allowed

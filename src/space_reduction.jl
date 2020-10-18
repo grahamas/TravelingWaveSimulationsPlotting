@@ -78,7 +78,12 @@ function reduce_along_max_central_gradient(data::AbstractAxisArray{T,2},
     max_grad_coord = Optim.minimizer(result_optim)
     max_grad = Interpolations.gradient(interpolation, max_grad_coord...)
 
-    max_grad_line = PointVectorLine(SA[max_grad_coord...], max_grad)
+    max_grad_line = try
+        PointVectorLine(SA[max_grad_coord...], max_grad)
+    catch e
+        @warn "Failed to find non-zero max gradient line"
+        return (nothing, nothing, nothing, nothing)
+    end
     return reduction(interpolation, max_grad_line, xs, ys, line_fineness)
 end
 
@@ -93,24 +98,27 @@ function reduce_normal_to_halfmax_contour(data::AbstractAxisArray{T,2},
     if length(halfmax_contour_lines) == 0
         return (nothing, nothing, nothing, nothing)
     elseif length(halfmax_contour_lines) > 1
-        @warn "Found multiple disconnected contours at level = 0.5: $(length.(coordinates.(halfmax_contour_lines)))"
+       #@warn "Found multiple disconnected contours at level = 0.5: $(length.(coordinates.(halfmax_contour_lines)))"
         return (nothing, nothing, nothing, nothing)
 
     end
     contour_points = zip(coordinates(only(halfmax_contour_lines))...) |> collect
-    nearby = max(min(div(length(contour_points), 4), 20), 1)
-    @assert nearby > 0 "len_contour = $(length(contour_points))"
-    if length(contour_points) < 2nearby + 1
-        @warn "contour too small"
-        return (nothing, nothing, contour_points, nothing)
-    end
+    nearby = max(div(length(contour_points), 4), 1)
+    # if length(contour_points) < 10
+    #     @warn "contour very small"
+    # end
     cp_center_dx = argmin(map(pt -> norm(pt .- center_pt), contour_points))
     cp_center_pt = contour_points[cp_center_dx]
 
-    nearby_gradients = contour_points[cp_center_dx-nearby:cp_center_dx+nearby] .|> pt -> Interpolations.gradient.(Ref(interpolation), pt...)
+    nearby_gradients = contour_points[max(1,cp_center_dx-nearby):min(length(contour_points),cp_center_dx+nearby)] .|> pt -> Interpolations.gradient.(Ref(interpolation), pt...)
     resultant_gradient = sum(nearby_gradients)
 
-    resultant_gradient_line = PointVectorLine(SA[cp_center_pt...], resultant_gradient)
+    resultant_gradient_line = try
+        PointVectorLine(SA[cp_center_pt...], resultant_gradient)
+    catch e
+        @warn "Failed to find non-zero contour-normal gradient"
+        return (nothing, nothing, nothing, nothing)
+    end
     return reduction(interpolation, resultant_gradient_line, xs, ys, line_fineness)
 end
 

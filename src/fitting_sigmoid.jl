@@ -16,8 +16,8 @@ function fit_sigmoid(ys, xs)
         xs = reverse(xs)
         ys = reverse(ys)
     end
-    if xs[begin] == xs[end]
-        return nothing
+    if xs[begin] == xs[end] || length(xs) < 3
+        return FittedSigmoid(missing)
     end
     left_val = ys[begin]
     sigmoid_change = ys[end] - ys[begin]
@@ -25,7 +25,8 @@ function fit_sigmoid(ys, xs)
     loss(params) = l2(ys, sigmoid_fn(params))
     D = CenteredDifference{1}(1, 2, xs[2] - xs[1], length(ys))
     derivative_estimate = D*ys
-    slope_est, i_max = findmax(abs.(derivative_estimate))
+    slope_est, i_max = findmax(abs.(derivative_estimate[begin+1:end-1]))
+    i_max += 1 # ensure i_max is not on the boundary
     threshold_est = xs[i_max]
 
     lower_param_bounds = [slope_est/5, xs[begin]]

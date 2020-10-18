@@ -1,13 +1,25 @@
 
+struct Bootstrapped{T}
+    results_from_subsampling::Vector{T}
+    result_from_full::T
+end
+
+struct Estimated{T}
+    estimate::T
+    band::T
+end
 
 function bootstrap(fn::Function, naa::NamedAxisArray, kept_axes...; 
         min_prop, max_prop, n_samples)
     name_syms = _namedaxisarray_names(naa)
     subsampled_syms = Tuple(setdiff(name_syms, kept_axes))
     results_from_subsamples = map(fn, subsamples_over_axes(naa, subsampled_syms, min_prop, max_prop, n_samples))
+    result_from_full = fn(naa)
+    return Bootstrapped(results_from_subsamples, result_from_full)
 end
 
 struct NamedAxesSubsampleIdxs
+    array
     axes_dict
     min_N
     max_N
@@ -17,7 +29,7 @@ Base.length(nasi::NamedAxesSubsampleIdxs) = nasi.n_samples
 Base.eltype(nasi::NamedAxesSubsampleIdxs) = typeof(first(nasi))
 
 function get_subsample_sizes(subsampler, max_tries)
-    all_dim_names = set(keys(subsampler.axes_dict))
+    all_dim_names = keys(subsampler.axes_dict) |> Set
     all_sample_sizes = subsampler.min_N:subsampler.max_N
     dim_names = copy(all_dim_names)
     sample_sizes = copy(all_sample_sizes)
@@ -25,16 +37,17 @@ function get_subsample_sizes(subsampler, max_tries)
     subsample_sizes_dict = Dict()
     while true
         if n_tries > max_tries
-            error("failed to find valid subsampling")
+            error("failed to find valid subsampling for $all_sample_sizes")
         end
         n_tries += 1
         while !isempty(dim_names)
-            dim_name = sample(1, dim_names, replace=false)
+            dim_name = sample(collect(dim_names), 1, replace=false) |> only
+            pop!(dim_names, dim_name)
             dim_len = length(subsampler.axes_dict[dim_name])
             dividing_sample_sizes = filter(1:dim_len) do dim_sample_size
                 any(sample_sizes .% dim_sample_size .== 0)
             end 
-            dim_sample_size = sample(1, dividing_sample_sizes)
+            dim_sample_size = sample(dividing_sample_sizes, 1) |> only
             sample_sizes = sample_sizes[sample_sizes .% dim_sample_size .== 0] .÷ dim_sample_size
             subsample_sizes_dict[dim_name] = dim_sample_size
         end
@@ -54,22 +67,26 @@ end
 # Note: subsample axes rather than coordinates so that you're comparing apples-to-apples:
 #       the quantities we're bootstrapping are comparisons of averages. It only makes sense
 #       to make those comparisons when the averages are over the same domain
-function get_idxs(subsampler::NamedAxesSubsampleIdxs, max_tries=1000)
+function get_idxs(subsampler::NamedAxesSubsampleIdxs, max_tries=500)
     subsample_sizes_dict = get_subsample_sizes(subsampler, max_tries)
-    subsample_dict = Dict(name => sample(sample_size, subsampler.axes_dict[name]) 
+    subsample_dict = Dict(name => sample(subsampler.axes_dict[name], sample_size)
         for (name, sample_size) in pairs(subsample_sizes_dict))
     return subsample_dict    
 end
-function iterate(subsampler::NamedAxesSubsampleIdxs, state=subsampler.n_samples)
-    state == 0 ? nothing : (get_idxs(subsampler), state - 1)
+function Base.iterate(subsampler::NamedAxesSubsampleIdxs, state=subsampler.n_samples)
+    state == 0 ? nothing : (getindex(subsampler.array; get_idxs(subsampler)...), state - 1)
 end
 
 
 function subsamples_over_axes(naa::NamedAxisArray, axis_names, 
         min_prop, max_prop, n_samples)
-    axes_dict = Dict(name => axes_keys(naa)[dim(naa, axis_names)] for name in axis_names)
+    axes_dict = Dict(name => axes_keys(naa)[dim(naa, name)] for name in axis_names)
     N = prod(length.(values(axes_dict)))
+    @show axes_dict
     min_N, max_N = ceil(Int, min_prop * N), floor(Int, max_prop * N)
+    @show min_N, max_N
+    @info "calculating max_n_samples:"
+    @info "$(binomial(N, max_N))"
     @assert N >= min_N
-    return NamedAxesSubsampleIdxs(axes_dict, min_N, max_N, n_samples)
+    return NamedAxesSubsampleIdxs(naa, axes_dict, min_N, max_N, n_samples)
 end
