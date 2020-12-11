@@ -1,4 +1,4 @@
-function axisarray_heatmap!(scene::Scene, data::AbstractAxisArray, ax_labels=Union{Tuple,Nothing}, 
+function axisarray_heatmap!(scene::Scene, data::AxisArray, ax_labels=Union{Tuple,Nothing}, 
         colorbar_width::Union{Nothing,Int}=nothing; hide_y=false)
     sweep_ax = LAxis(scene)
     x, y = axes_keys(data)

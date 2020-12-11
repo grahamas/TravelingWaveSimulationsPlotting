@@ -1,5 +1,5 @@
 
-function slice(data::AbstractAxisArray{T,2}, target_line::PointVectorLine{2,T,S}, step_fineness=5) where {T,S}
+function slice(data::AxisArray{T,2}, target_line::PointVectorLine{2,T,S}, step_fineness=5) where {T,S}
     xs, ys = axes_keys(data)
     interpolation = interpolate(data, Gridded(Linear()))
     return slice(interpolation, target_line, xs, ys, step_fineness)
@@ -30,7 +30,7 @@ function slice(interpolation::AbstractInterpolation, target_line::PointVectorLin
     return (dists, values, points, line) 
 end
 
-function squish(data::AbstractAxisArray{T,2}, target_line::PointVectorLine{2,T,S}, args...) where {T,S}
+function squish(data::AxisArray{T,2}, target_line::PointVectorLine{2,T,S}, args...) where {T,S}
     xs, ys = axes_keys(data)
     interpolation = interpolate(data, Gridded(Linear()))
     return squish(interpolation, target_line, xs, ys, args...)
@@ -62,7 +62,7 @@ function _midpoint(arr::AbstractArray)
     return (arr[end] - arr[begin]) / 2 + arr[begin]
 end
 reduce_along_max_central_gradient(data::NamedAxisArray, args...) = reduce_along_max_central_gradient(data.data, args...)
-function reduce_along_max_central_gradient(data::AbstractAxisArray{T,2}, 
+function reduce_along_max_central_gradient(data::AxisArray{T,2}, 
         reduction::Function=slice, line_fineness=5) where T
     xs, ys = axes_keys(data)
     center_pt = [_midpoint(xs), _midpoint(ys)] 
@@ -88,7 +88,7 @@ function reduce_along_max_central_gradient(data::AbstractAxisArray{T,2},
 end
 
 reduce_normal_to_halfmax_contour(data::NamedAxisArray, args...) = reduce_normal_to_halfmax_contour(data.data, args...)
-function reduce_normal_to_halfmax_contour(data::AbstractAxisArray{T,2}, 
+function reduce_normal_to_halfmax_contour(data::AxisArray{T,2}, 
         reduction::Function=slice, line_fineness=5) where T
     xs, ys = axes_keys(data)
     center_pt = (_midpoint(xs), _midpoint(ys))
@@ -168,8 +168,8 @@ end
 
 # FIXME needs better home
 function calc_binary_segmentation(arr)
-    never = sum(arr .== 0)
-    always = sum(arr .== 1)
+    never = count(arr .≈ 0)
+    always = count(arr .≈ 1)
     total = prod(size(arr))
     sometimes = total - (always + never)
     return (none = never / total,

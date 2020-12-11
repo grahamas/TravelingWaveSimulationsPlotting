@@ -50,3 +50,34 @@ function collapse_and_fit_sigmoid(uncollapsed_space, (x_axis_name, y_axis_name),
     line_dists, line_vals, line_locs, line = reduce_along_max_central_gradient(phase_space, reduction)
     fit_sigmoid(line_vals, line_dists)
 end
+
+# offset - A sigmoid(-a (x - theta))
+# where x is distance along PointVectorLine(θ, φ)
+struct SigmoidOnSlice{T}
+    offset::T
+    A::T
+    a::T
+    θ::SVector{2,T}
+    φ::SVector{2,T}
+    error::T
+end
+function SigmoidOnSlice(sig::FittedSigmoid{T}, lin::PointVectorLine) where {T<:Number}
+    SigmoidOnSlice{T}(
+        sig.left_val,
+        sig.change,
+        sig.slope,
+        point_from_distance(lin, sig.threshold),
+        lin.vector,
+        sig.error
+    )
+end
+function SigmoidOnSlice(sig::FittedSigmoid{Missing}, ::Any)
+    SigmoidOnSlice{Missing}(
+        missing,
+        missing,
+        missing,
+        SA[missing, missing],
+        SA[missing, missing],
+        missing        
+    )
+end

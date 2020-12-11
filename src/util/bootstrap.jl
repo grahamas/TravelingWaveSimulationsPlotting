@@ -5,8 +5,8 @@ struct Bootstrapped{T}
 end
 
 struct Estimated{T}
-    estimate::T
-    band::T
+    mean::T
+    band::Union{T,Tuple{T,T}}
 end
 
 function bootstrap(fn::Function, naa::NamedAxisArray, kept_axes...; 

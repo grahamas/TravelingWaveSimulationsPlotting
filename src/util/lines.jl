@@ -14,14 +14,14 @@ function project(coord::C, line::C, line_point::C) where {N, C <: SVector{N}}
 end
 
 line_dist_to_coord(dist, line, origin) = (dist * line) + origin 
-#axes_vals(data::AbstractAxisArray) = keys.(axes(data))
+#axes_vals(data::AxisArray) = keys.(axes(data))
 
 struct PointVectorLine{N,T,S<:SVector{N,T}}
     point::S
     vector::S  # FIXME should have special vertical and horizontal lines and/or insist norm(vector) != 0
     PointVectorLine(point::S,vector::S) where {N,T,S<:SVector{N,T}} = begin
         @assert any(abs.(vector) .> sqrt(eps(T)))
-        new{N,T,S}(point,vector)
+        new{N,T,S}(point,vector ./ norm(vector))
     end
 end
 function slope(line::PointVectorLine{2})

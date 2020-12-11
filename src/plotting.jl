@@ -8,160 +8,65 @@ LABEL_DICT = merge(
 )
 
 function default_label_translate(sym::Symbol)
-    getkey(LABEL_DICT, sym, LaTeXString(sym |> string))
+    getkey(LABEL_DICT, sym, sym |> string)
 end
 
-function save_metasweep(mdb_path, args...; 
-        unique_id="$(Dates.now())",
-        sweep_name="metasweep",
-        plots_subdir=plotsdir("$(sweep_name)_$(unique_id)"),
+NaN_if_missing(::Val{T}, ::Missing) where {T} = T(NaN)
+NaN_if_missing(::Val{T}, val::T) where {T} = val
+
+
+function _plot_and_save(plot_fn!, mdb_path::AbstractString, args...;
+        plot_name,
+        plots_subdir,
         kwargs...)
-    scene, _ = figure_metasweep(mdb_path, args...; 
+    
+    scene, _ = init_scene_and_plot(plot_fn!, mdb_path, args...; 
                                       plots_subdir=plots_subdir,
                                       kwargs...)
-    fname = "metasweep_$(unique_id).png"
-    mkpath(plotsdir(plots_subdir))
-    save_name = plotsdir(plots_subdir, fname)
-    @info "saving $save_name"
-    Makie.save(save_name, scene)
+
+    save_path = plotsdir(plots_subdir, plot_name)
+    @info "saving $save_path"
+    Makie.save(save_path, scene)
     return scene
 end
 
-function figure_metasweep(args...; 
-                        scene_resolution=(600, 600), kwargs...)
+function plot_and_save(plot_fn!, mdb_path::AbstractString, args...; 
+        unique_id="$(Dates.now())",
+        sweep_name="metasweep",
+        plot_name = "$(sweep_name)_$(strip(string(plot_fn!), '!'))_$(unique_id).png",
+        plots_subdir=plotsdir("$(sweep_name)_$(unique_id)"),
+        kwargs...)
+    
+    mkpath(plots_subdir)
+    @show kwargs
+    scene = _plot_and_save(plot_fn!, mdb_path, args...;
+        plot_name=plot_name,
+        plots_subdir=plots_subdir, kwargs...)
+    return scene
+end
+
+function plot_and_save(plot_fn!, args_list::AbstractVector;
+        unique_id="$(Dates.now())",
+        sweep_name="metasweep",
+        plots_subdir=plotsdir("$(sweep_name)_$(unique_id)"), kwargs...)
+    
+    mkpath(plots_subdir)
+    scenes = [_plot_and_save(plot_fn!, args...; kwargs...,
+                                      plots_subdir=plots_subdir) for args in args_list]
+    return scenes
+end
+
+function init_scene_and_plot(plot_fn!, args...; 
+                        scene_resolution=(2400, 2400), kwargs...)
     scene, layout = layoutscene(resolution=scene_resolution)
 
-    layout[1,1] = figure_metasweep!(scene, args...; kwargs...)
+    layout[1,1] = plot_fn!(scene, args...; kwargs...)
 
     return (scene, layout)
 end
 
 import AbstractPlotting: convert_arguments
 convert_arguments(est::Estimated) = (est.estimate,)
-
-function metasweep_plot!(scene, (x_axis,)::NTuple{1}, args...; 
-        title="", plotted_var_name::AbstractString, 
-        metasweep_var_names::NTuple{1}, kwargs...)
-    ax = LAxis(scene, title=title, xlabel=metasweep_var_names[1],
-        ylabel=plotted_var_name)
-    plot!(ax, x_axis, args...; kwargs...)
-    return ax
-end
-
-function metasweep_plot!(scene, (x_axis,)::NTuple{1}, estimates::Vector{<:Estimated}; 
-        title="", plotted_var_name::AbstractString, 
-        metasweep_var_names::NTuple{1}, kwargs...)
-    ax = LAxis(scene, title=title, xlabel=metasweep_var_names[1],
-        ylabel=plotted_var_name)
-    ests = map(est -> est.estimate, estimates)
-    bands = map(est -> est.band, estimates)
-    plot!(ax, x_axis, ests; kwargs...)
-    errorbars!(ax, x_axis, ests, bands)
-    return ax
-end
-
-function metasweep_plot!(scene::Scene, (x_axis, y_axis)::NTuple{2}, args...;  
-        title="", plotted_var_name::AbstractString, 
-        metasweep_var_names::NTuple{2}, kwargs...)
-    layout = GridLayout()
-    layout[1,1] = ax = LAxis(scene, title=title, 
-        xlabel=metasweep_var_names[1],
-        ylabel=metasweep_var_names[2])
-    plt = heatmap!(ax, x_axis, y_axis, args...; kwargs...)
-    tightlimits!(ax)
-    layout[1,2] = LColorbar(scene, plt, width=20, 
-        label=plotted_var_name)
-    return layout
-end
-
-function extract_and_plot_metasweep_estimates!(scene, metasweep_values, bootstraps, 
-        extract_fn::Function; band_fn=std::Function, plot_kwargs...)
-    estimates = map(bootstraps) do bootstrap
-        full_estimate = extract_fn(bootstrap.result_from_full)
-        non_missing = skipmissing([extract_fn(result) for result in bootstrap.results_from_subsampling])
-        if length(non_missing |> collect) < 2
-            return Estimated(missing, missing)
-        end
-        estimate_std = band_fn(non_missing) 
-        return Estimated(full_estimate, estimate_std)
-    end
-    return metasweep_plot!(scene, metasweep_values, estimates; plot_kwargs...)
-end
-
-function figure_metasweep!(scene::Scene, mdb_path::String, 
-        (x_sym, y_sym)::Tuple{Symbol,Symbol}, 
-        metasweep_syms::NTuple{N,Symbol}, 
-        property_sym::Symbol; plots_subdir=nothing, 
-        label_translate=default_label_translate) where N
-    data = TravelingWaveSimulations.load_ExecutionClassifications(AbstractArray, mdb_path)[property_sym]
-
-    metasweep_values = map(sym -> axes_keys(data)[dim(data, sym)], metasweep_syms)
-    metasweep_value_pairs = product(metasweep_values...)
-    getindex_metasweep_dim(arr, idxs) = getindex(arr; Dict(sym => idx for (sym, idx) in zip(metasweep_syms, idxs))...)
-
-    (xs, ys) = axes_keys(_collapse_to_axes(getindex_metasweep_dim(data, first(metasweep_value_pairs)), x_sym, y_sym))
-
-    bootstrapped_sigmoid_fits = map(metasweep_value_pairs) do metasweep_value_pair
-        metasweep_slice = getindex_metasweep_dim(data, metasweep_value_pair)
-        flattened_metasweep_slice = _collapse_to_axes(metasweep_slice, x_sym, y_sym)
-        if plots_subdir !== nothing
-            save_reduce_2d_and_steepest_line_and_histogram((x_sym, y_sym), flattened_metasweep_slice,
-                    property_sym, "$metasweep_value_pair", plots_subdir; facet_title="$metasweep_value_pair")
-        end
-        bootstrapped_sigmoid_fit = bootstrap(metasweep_slice, x_sym, y_sym;
-                                             min_prop=0.6, max_prop=0.75, 
-                                             n_samples=10000) do subsampled_slice
-            flattened_subsampled_slice = _collapse_to_axes(subsampled_slice, x_sym, y_sym)
-            dists, vals, locs, lin = reduce_normal_to_halfmax_contour(flattened_subsampled_slice, slice)
-            fitted_sigmoid = fit_sigmoid(vals, dists)
-            phase_space_sigmoid = SigmoidOnSlice(fitted_sigmoid, lin)
-        end
-        return bootstrapped_sigmoid_fit
-    end
-
-    set_theme!(LAxis=(textsize=5,), LText=(tellwidth=false, tellheight=false))
-    layout = GridLayout(resolution=(1200,1200))
-
-    layout[1,1] = extract_and_plot_metasweep_estimates!(scene, metasweep_values, bootstrapped_sigmoid_fits, res -> res.A; plotted_var_name="A", metasweep_var_names=label_translate.(metasweep_syms))
-    layout[1,2] = extract_and_plot_metasweep_estimates!(scene, metasweep_values, bootstrapped_sigmoid_fits, res -> res.a; plotted_var_name="a", metasweep_var_names=label_translate.(metasweep_syms))
-    layout[2,1] = extract_and_plot_metasweep_estimates!(scene, metasweep_values, bootstrapped_sigmoid_fits, res -> res.θ[1]; plotted_var_name="θ: $(label_translate(x_sym))", metasweep_var_names=label_translate.(metasweep_syms))
-    layout[2,2] = extract_and_plot_metasweep_estimates!(scene, metasweep_values, bootstrapped_sigmoid_fits, res -> res.θ[2]; plotted_var_name="θ: $(label_translate(y_sym))", metasweep_var_names=label_translate.(metasweep_syms))
-    layout[3,1] = extract_and_plot_metasweep_estimates!(scene, metasweep_values, bootstrapped_sigmoid_fits, res -> res.φ[1]; plotted_var_name="φ: $(label_translate(x_sym))", metasweep_var_names=label_translate.(metasweep_syms))
-    layout[3,2] = extract_and_plot_metasweep_estimates!(scene, metasweep_values, bootstrapped_sigmoid_fits, res -> res.φ[2]; plotted_var_name="φ: $(label_translate(y_sym))", metasweep_var_names=label_translate.(metasweep_syms))
-
-    return layout
-end
-
-# offset - A sigmoid(-a (x - theta))
-# where x is distance along PointVectorLine(θ, φ)
-struct SigmoidOnSlice{T}
-    offset::T
-    A::T
-    a::T
-    θ::SVector{2,T}
-    φ::SVector{2,T}
-    error::T
-end
-function SigmoidOnSlice(sig::FittedSigmoid{T}, lin::PointVectorLine) where {T<:Number}
-    SigmoidOnSlice{T}(
-        sig.left_val,
-        sig.change,
-        sig.slope,
-        point_from_distance(lin, sig.threshold),
-        lin.vector,
-        sig.error
-    )
-end
-function SigmoidOnSlice(sig::FittedSigmoid{Missing}, ::Any)
-    SigmoidOnSlice{Missing}(
-        missing,
-        missing,
-        missing,
-        SA[missing, missing],
-        SA[missing, missing],
-        missing        
-    )
-end
 
 
 

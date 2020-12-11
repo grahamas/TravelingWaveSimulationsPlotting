@@ -1,5 +1,5 @@
 _namedaxisarray_names(naa::NamedAxisArray{names}) where names = names
-get_coordinates(aaa::AbstractAxisArray) = product(keys.(axes(aaa))...) |> collect
+get_coordinates(aaa::AxisArray) = product(keys.(axes(aaa))...) |> collect
 
 
 function _collapse_to_axes(A, x_sym, y_sym)
@@ -14,4 +14,4 @@ function _collapse_to_axes(A, x_sym, y_sym)
 end
 
 get_data(aa::AbstractArray) = aa
-get_data(aa::AbstractAxisArray) = get_data(parent(aa))
+get_data(aa::AxisArray) = get_data(parent(aa))
