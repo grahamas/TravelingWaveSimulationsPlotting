@@ -172,7 +172,8 @@ function calc_binary_segmentation(arr)
     always = count(arr .≈ 1)
     total = prod(size(arr))
     sometimes = total - (always + never)
-    return (none = never / total,
-            some = sometimes / total,
-            all = always / total)
+    return (none = never,
+            some = sometimes,
+            all = always,
+            total = total)
 end

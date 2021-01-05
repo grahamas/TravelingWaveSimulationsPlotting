@@ -1,28 +1,43 @@
 function figure_example!(scene::Scene, mdb_path::String,
-        fixing_mods::NamedTuple{NAMES}; plots_subdir, unique_id="", animate=true) where NAMES
+        fixing_mods::NamedTuple{NAMES}) where NAMES
     prototype_name, all_mods = read_params_from_data_path(mdb_path)
-    @show all_mods
+    figure_example!(scene, prototype_name, all_mods, fixing_mods)
+end
+
+function figure_example!(scene::Scene, prototype_name, all_mods, fixing_mods) where NAMES
     fixed_mods = Dict(key => val for (key,val) in pairs(all_mods) if length(val)== 1)
-    @show fixed_mods
     unfixed_mod_names = [key for (key, val) in pairs(all_mods) if length(val) > 1]
     @assert Set(NAMES) == Set(unfixed_mod_names) "$(Set(NAMES) - Set(unfixed_mod_names)): all varying parameters must be fixed by example, and no extraneous mods are allowed"
 
     # other_opts = Dict() makes sure it saves all frames
     mods = (fixed_mods..., fixing_mods..., save_idxs=nothing, save_on=true)
-    @show mods
     write_modifications!(plots_subdir, mods, unique_id)
     prototype = get_prototype(prototype_name)
     (mod_name, exec) = execute_single_modification(prototype, mods)
-    @show mod_name
 
     layout = exec_heatmap!(scene, exec; clims=(0.0,0.5), title=string(fixing_mods))
     layout[end+1,2] = LText(scene, string(exec.simulation.global_reduction(exec.solution).propagation), tellwidth=false)
 
-    if animate
-        animate_execution(joinpath(plots_subdir, "$(unique_id == "" ? "" : "$(unique_id)_")animation.mp4"), exec)
-    end
-
-
     return layout
+end
+
+function figure_example(prototype_name, all_mods, fixing_mods;
+        scene_resolution=(800,400))
+    scene, layout = layoutscene(resolution=scene_resolution)
+    layout[1,1:2] = figure_example!(scene, prototype_name, all_mods, fixing_mods)
+    fixing_mods_strs = ["$(name)=$(val)" for (name, val) in pairs(fixing_mods)]
+    return (scene, layout, join(fixing_mods_strs, "_"))
+end
+
+function figure_example(mdb_path, fixing_mods; kwargs...)
+    prototype_name, all_mods = read_params_from_data_path(mdb_path)
+    figure_example(prototype_name, all_mods, fixing_mods; kwargs...)
+end
+
+function multiple_figure_examples(mdb_path, fixing_mods_list; kwargs...)
+    prototype_name, all_mods = read_params_from_data_path(mdb_path)
+    map(fixing_mods_list) do fixing_mods
+        figure_example(prototype_name, all_mods, fixing_mods; kwargs...)
+    end
 end
 
