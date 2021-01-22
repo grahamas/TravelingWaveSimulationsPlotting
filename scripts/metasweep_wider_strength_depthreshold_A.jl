@@ -8,6 +8,35 @@ metasweep_A_fpath = TravelingWaveSimulations.get_recent_simulation_data_path(joi
 # Definitely propagating
 session_id = "$(Dates.now())"
 
+plot_and_save_many(multiple_figure_examples,
+    metasweep_A_fpath,
+    [
+        (Aee=120., Aei=200., Aie=125., Aii=125., blocking_θI=9., stim_strength=2.), # dep-block non-prop. (sus.)
+        (Aee=120., Aei=200., Aie=125., Aii=125., blocking_θI=9., stim_strength=3.), # dep-block mid prop. (sus.)
+        (Aee=120., Aei=200., Aie=125., Aii=125., blocking_θI=9., stim_strength=20.), # dep-block prop. (sus.)
+        (Aee=120., Aei=200., Aie=125., Aii=125., blocking_θI=29., stim_strength=2.), # monotonic non-prop. (not sus.)
+        (Aee=120., Aei=200., Aie=125., Aii=125., blocking_θI=29., stim_strength=3.), # monotonic mid prop. (not sus.)
+        (Aee=120., Aei=200., Aie=125., Aii=125., blocking_θI=29., stim_strength=20.), # monotonic prop. (not sus.)
+        (Aee=120., Aei=80., Aie=125., Aii=125., blocking_θI=29., stim_strength=2.), # monotonic non-prop. (sus.)
+        (Aee=120., Aei=80., Aie=125., Aii=125., blocking_θI=29., stim_strength=3.), # monotonic mid prop. (sus.)
+        (Aee=120., Aei=80., Aie=125., Aii=125., blocking_θI=29., stim_strength=20.), # monotonic prop. (sus.)
+        (Aee=40., Aei=240., Aie=125., Aii=125., blocking_θI=9., stim_strength=2.), # dep-block non-prop. (not sus.)
+        (Aee=40., Aei=240., Aie=125., Aii=125., blocking_θI=9., stim_strength=3.), # dep-block mid prop. (not sus.)
+        (Aee=40., Aei=240., Aie=125., Aii=125., blocking_θI=9., stim_strength=20.), # dep-block prop. (not sus.)
+        (Aee=40., Aei=240., Aie=125., Aii=125., blocking_θI=29., stim_strength=2.), # monotonic non-prop. (not sus.)
+        (Aee=40., Aei=240., Aie=125., Aii=125., blocking_θI=29., stim_strength=3.), # monotonic mid prop. (not sus.)
+        (Aee=40., Aei=240., Aie=125., Aii=125., blocking_θI=29., stim_strength=20.), # monotonic prop. (not sus.)
+        (Aee=300., Aei=60., Aie=125., Aii=125., blocking_θI=9., stim_strength=2.), # dep-block non-prop. (always)
+        (Aee=300., Aei=60., Aie=125., Aii=125., blocking_θI=9., stim_strength=3.), # dep-block mid prop. (always)
+        (Aee=300., Aei=60., Aie=125., Aii=125., blocking_θI=9., stim_strength=20.), # dep-block prop. (always)
+        (Aee=300., Aei=60., Aie=125., Aii=125., blocking_θI=29., stim_strength=2.), # monotonic non-prop. (always)
+        (Aee=300., Aei=60., Aie=125., Aii=125., blocking_θI=29., stim_strength=3.), # monotonic mid prop. (always)
+        (Aee=300., Aei=60., Aie=125., Aii=125., blocking_θI=29., stim_strength=20.) # monotonic prop. (always)
+    ];
+    session_name=session_name,
+    session_id=session_id
+)
+
 plot_and_save_many(multiple_averaged_to_axes,
     metasweep_A_fpath;
     axes=[(:Aei, :Aee), (:Aie, :Aii)],
