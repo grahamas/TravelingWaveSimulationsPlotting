@@ -63,3 +63,8 @@ end
 import AbstractPlotting: convert_arguments
 convert_arguments(est::Estimated) = (est.estimate,)
 
+function layout_plot(plot_fn, args...; kwargs...)
+    scene, layout = layoutscene()
+    layout[1,1] =  plot_fn(scene, args...; kwargs...)
+    return (scene, layout)
+end
