@@ -29,10 +29,12 @@ export heatmap_sweep_with_target,
     figure_contrast_monotonic_blocking_all, 
     figure_example_contrast_monotonic_blocking_all,
     save_figure_example_contrast_monotonic_blocking_all,
-    plot_and_save
+    plot_and_save, layout_plot
 include("plot/axisarray.jl")
 export axisarray_heatmap!
 include("plot/metasweep.jl")
+include("plot/nullclines.jl")
+export nullclines, nullclines!
 
 include("figures/binarization.jl")
 include("figures/sigmoid_fit.jl")
