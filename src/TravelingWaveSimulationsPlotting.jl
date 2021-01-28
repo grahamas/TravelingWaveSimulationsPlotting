@@ -34,7 +34,8 @@ include("plot/axisarray.jl")
 export axisarray_heatmap!
 include("plot/metasweep.jl")
 include("plot/nullclines.jl")
-export nullclines, nullclines!
+export nullclines, nullclines!,
+    calculate_fixedpoints
 
 include("figures/binarization.jl")
 include("figures/sigmoid_fit.jl")
