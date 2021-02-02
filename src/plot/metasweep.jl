@@ -1,7 +1,7 @@
 function metasweep_plot!(scene, (x_axis,)::NTuple{1,<:AbstractVector{T}}, vals::AbstractVector{T};  lims = nothing,
         title="fixme", plotted_var_name::AbstractString, 
         metasweep_var_names::NTuple{1}, kwargs...) where {T<:Number}
-    ax = LAxis(scene,  xlabel=metasweep_var_names[1],
+    ax = MakieLayout.Axis(scene,  xlabel=metasweep_var_names[1],
         ylabel=plotted_var_name)
         vals_copy = NaN_if_missing.(Val(T), vals)
     plot!(ax, collect(x_axis), vals_copy; kwargs...)
@@ -15,7 +15,7 @@ function metasweep_plot!(scene, (x_axis,)::NTuple{1,<:AbstractVector{T}}, stats_
         title="", plotted_var_name::AbstractString, lims = nothing, 
         metasweep_var_names::NTuple{1}, kwargs...) where T
     # FIXME add title back
-    ax = LAxis(scene, xlabel=metasweep_var_names[1], 
+    ax = MakieLayout.Axis(scene, xlabel=metasweep_var_names[1], 
         ylabel=plotted_var_name)
     full_statistics = map(est -> NaN_if_missing(Val(T), est[1]), stats_and_estimates)
     est_means = map(est -> est[2].mean, stats_and_estimates)
@@ -35,7 +35,7 @@ function metasweep_plot!(scene::Scene, (x_axis, y_axis)::Tuple{<:AbstractVector{
         metasweep_var_names::NTuple{2}, kwargs...) where {T<:Number}
     vals = collect(vals)
     layout = GridLayout()
-    layout[1,1] = ax = LAxis(scene,  
+    layout[1,1] = ax = MakieLayout.Axis(scene,  
         xlabel=metasweep_var_names[1],
         ylabel=metasweep_var_names[2])
     vals_copy = NaN_if_missing.(Val(T), vals)
@@ -53,7 +53,7 @@ function metasweep_plot!(scene::Scene, (x_axis, y_axis)::Tuple{<:AbstractVector{
         title="fixme", plotted_var_name::AbstractString, 
         metasweep_var_names::NTuple{2}, kwargs...) where {T<:Number}
     layout = GridLayout()
-    layout[1,1] = ax = LAxis(scene,  
+    layout[1,1] = ax = MakieLayout.Axis(scene,  
         xlabel=metasweep_var_names[1],
         ylabel=metasweep_var_names[2])
     full_statistics = map(est -> NaN_if_missing(Val(T), est[1]), stats_and_estimates)

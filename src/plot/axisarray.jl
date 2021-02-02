@@ -1,6 +1,6 @@
 function axisarray_heatmap!(scene::Scene, data::AxisArray, ax_labels=Union{Tuple,Nothing}, 
         colorbar_width::Union{Nothing,Int}=nothing; hide_y=false)
-    sweep_ax = LAxis(scene)
+    sweep_ax = MakieLayout.Axis(scene)
     x, y = axes_keys(data)
     heatmap = heatmap!(sweep_ax, x, y, get_data(data), colorrange=(0,1))
     #tightlimits!(sweep_ax)

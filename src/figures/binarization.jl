@@ -97,7 +97,7 @@ function figure_binarization_counts!(scene::Scene, data::AbstractArray;
     binary_segmentations = [tup[1] for tup in binarization_counts_by_independent_axes]
     propagations = [tup[2] for tup in binarization_counts_by_independent_axes]
 
-    set_theme!(LAxis=(textsize=5,), LText=(tellwidth=false, tellheight=false))
+    set_theme!(Axis=(textsize=5,), Label=(tellwidth=false, tellheight=false))
     layout = GridLayout()
 
     layout[1,1] = metasweep_plot!(scene, independent_axes_values, [bin_seg.some / sum(bin_seg) for bin_seg in binary_segmentations]; 
@@ -152,7 +152,7 @@ function figure_binarization_counts!(scene_layouts::AbstractVector{<:Tuple}, dat
     binary_segmentations = [tup[1] for tup in binarization_counts_by_independent_axes]
     propagations = [tup[2] for tup in binarization_counts_by_independent_axes]
 
-    # set_theme!(LAxis=(textsize=5,), LText=(tellwidth=false, tellheight=false))
+    # set_theme!(Axis=(textsize=5,), Label=(tellwidth=false, tellheight=false))
 
     bin_seg_total = binary_segmentations[1].total
     prop_total = propagations[1].n_total

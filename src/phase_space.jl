@@ -2,7 +2,7 @@
 
 function plot_binary_segmentation!(scene::Scene, data)
     segmented = calc_binary_segmentation(data)
-    segmented_ax = LAxis(scene)
+    segmented_ax = MakieLayout.Axis(scene)
     segment_names = string.([keys(segmented)...])
     barplot!(segmented_ax, [values(segmented)...])
     ylims!(segmented_ax, 0, 1)
@@ -42,11 +42,11 @@ function reduce_2d_and_steepest_line_and_histogram!(
                                 colorbar_width=nothing)
     layout = GridLayout()
 
-    title_facet = LText(scene, facet_title, textsize=titlesize, tellwidth=false)
+    title_facet = Label(scene, facet_title, textsize=titlesize, tellwidth=false)
     sweep_sublayout = axisarray_heatmap!(scene, data, colorbar_width)
     reduction_sublayout = plot_reduction!(scene, slice, data, get_content(sweep_sublayout, 1, 1))
     if isnothing(reduction_sublayout)
-        reduction_sublayout = LAxis(scene)
+        reduction_sublayout = MakieLayout.Axis(scene)
     end
     segmented_ax = plot_binary_segmentation!(scene, data)
 

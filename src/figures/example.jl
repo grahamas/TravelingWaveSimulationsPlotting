@@ -16,7 +16,7 @@ function figure_example!(scene::Scene, prototype_name, all_mods, fixing_mods::Na
     (mod_name, exec) = execute_single_modification(prototype, mods)
 
     layout = exec_heatmap!(scene, exec; colorrange=(0.0,0.5), title=title, kwargs...)
-    # layout[end+1,2] = LText(scene, string(exec.simulation.global_reduction(exec.solution).propagation), tellwidth=false)
+    # layout[end+1,2] = Label(scene, string(exec.simulation.global_reduction(exec.solution).propagation), tellwidth=false)
 
     return layout
 end

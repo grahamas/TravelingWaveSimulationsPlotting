@@ -98,7 +98,7 @@ function plot_nonlinearity!(scene::Scene, nonlinearities::Simulation73.AbstractP
 
     nonl_xs, nonl_ys = _auto_range(nonlinearities |> Simulation73.array)
     @show nonl_xs
-    ax = layout[1,1] = LAxis(scene, xlabel="input (a.u.)", ylabel="pop. activity (proportion)", title=title)
+    ax = layout[1,1] = MakieLayout.Axis(scene, xlabel="input (a.u.)", ylabel="pop. activity (proportion)", title=title)
     @show parse(Colorant, ax.attributes[:backgroundcolor][])
     colors = distinguishable_colors(length(pop_names), parse(Colorant, ax.attributes[:backgroundcolor][]), dropseed=true)
     plots = [lines!(ax, xs, ys, width=3, color=color) 

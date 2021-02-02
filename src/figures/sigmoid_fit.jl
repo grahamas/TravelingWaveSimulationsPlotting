@@ -39,7 +39,7 @@ function figure_metasweep_sigmoid_fits!(scene::Scene, mdb_path::String,
     binary_segmentations = [tup[2] for tup in bootstrapped_sigmoid_fits_and_binary_counts]
     propagations = [tup[3] for tup in bootstrapped_sigmoid_fits_and_binary_counts]
 
-    set_theme!(LAxis=(textsize=5,), LText=(tellwidth=false, tellheight=false))
+    set_theme!(Axis=(textsize=5,), Label=(tellwidth=false, tellheight=false))
     layout = GridLayout()
 
     layout[1,1] = extract_and_plot_metasweep!(scene, metasweep_values, bootstrapped_sigmoid_fits, res -> res.A; plotted_var_name="A", metasweep_var_names=label_translate.(metasweep_syms),

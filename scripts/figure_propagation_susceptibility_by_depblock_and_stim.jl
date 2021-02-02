@@ -79,12 +79,12 @@ function figure_propagation_susceptability_by_depblock_and_stim!(scene, fpath; k
                         _param[:stim_strength] == stim_strength
                 )
             end
-            sublayout[prop_cond_idx,2] = LText(scene, prop_name, tellheight=false, rotation=pi/2)
+            sublayout[prop_cond_idx,2] = Label(scene, prop_name, tellheight=false, rotation=pi/2)
             sublayout[prop_cond_idx,3:length(subsublayout)+2] = subsublayout
         end
-        sublayout[1:size(sublayout)[1],1] = LText(scene, "θI = $θI_value", tellheight=false, rotation=pi/2)
+        sublayout[1:size(sublayout)[1],1] = Label(scene, "θI = $θI_value", tellheight=false, rotation=pi/2)
 
-        sublayout[1,2:size(sublayout)[2]-1] = [LText(scene, "S = $stim_strength", tellwidth=false) for stim_strength in stim_strength_values]
+        sublayout[1,2:size(sublayout)[2]-1] = [Label(scene, "S = $stim_strength", tellwidth=false) for stim_strength in stim_strength_values]
         #layout[2+(θI_idx-1)*size(sublayout)[1]:1+θI_idx*size(sublayout)[1],
         #    2:size(sublayout)[2]+1] = sublayout
         layout[2:size(sublayout)[2]+1] = sublayout

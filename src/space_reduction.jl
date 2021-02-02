@@ -128,7 +128,7 @@ slice(data::NamedAxisArray, args...) = slice(data.data, args...)
 function draw_reduced_locations!(ax::Nothing, locs)
     @warn "no heatmap provided to inscribe reduction"
 end
-function draw_reduced_locations!(ax::LAxis, locs)
+function draw_reduced_locations!(ax::MakieLayout.Axis, locs)
     xs = [loc[1] for loc in locs]
     ys = [loc[2] for loc in locs]
     plot!(ax, xs, ys, color=:red)
@@ -137,25 +137,25 @@ end
 function plot_reduction!(scene::Scene, 
                             reducing_fn::Union{typeof(slice), typeof(squish)},
                             data,
-                            heatmap_ax::Union{Nothing,LAxis}=nothing)
+                            heatmap_ax::Union{Nothing,MakieLayout.Axis}=nothing)
     reduction_layout = GridLayout()
     dists, vals, locs, line = reduce_normal_to_halfmax_contour(data, reducing_fn)
     if isnothing(dists)
         return nothing
     end
-    reduction_ax = LAxis(scene)
+    reduction_ax = MakieLayout.Axis(scene)
     plot!(reduction_ax, dists, vals)
     draw_reduced_locations!(heatmap_ax, locs)
     fitted_sigmoid = fit_sigmoid(vals, dists)
     reduction_title = if fitted_sigmoid != nothing
         sigmoid_val = fitted_sigmoid.(dists)
         plot!(reduction_ax, dists, sigmoid_val, color=:green) 
-        LText(scene, 
+        Label(scene, 
             "a=$(round(fitted_sigmoid.slope,sigdigits=3)); θ=$(round.(point_from_distance(line, 
                         fitted_sigmoid.threshold),sigdigits=3))", 
             tellwidth=false)
     else
-        LText(scene, "no fit", tellwidth=false)
+        Label(scene, "no fit", tellwidth=false)
     end
     reduction_ax.xticks = ([dists[begin], dists[end]], 
                                 string.([floor.(Ref(Int), locs[begin]), 

@@ -26,7 +26,7 @@ end
 function nullclines!(scene, p::AbstractNullclineParams, us::AbstractVector, vs::AbstractVector)
 
     layout = GridLayout()
-    layout[1,1] = ax = LAxis(scene, aspect=DataAspect())
+    layout[1,1] = ax = MakieLayout.Axis(scene, aspect=DataAspect())
 
     dus = [wcm_du_defn(u, v, p) for u in us, v in vs]
     dvs = [wcm_dv_defn(u, v, p) for u in us, v in vs]
@@ -42,8 +42,8 @@ function nullclines!(scene, p::AbstractNullclineParams, us::AbstractVector, vs::
         xs, ys = coordinates(line)
         Makie.lines!(ax, xs, ys, color=:red, linestyle=:dash, linesize=5)
     end
-    layout[1,0] = LText(scene, "v", tellheight=false)
-    layout[end+1,2] = LText(scene, "u", tellwidth=false)
+    layout[1,0] = Label(scene, "v", tellheight=false)
+    layout[end+1,2] = Label(scene, "u", tellwidth=false)
     return layout
 end
 
