@@ -11,24 +11,25 @@ function metasweep_plot!(scene, (x_axis,)::NTuple{1,<:AbstractVector{T}}, vals::
     return ax
 end
 
-function metasweep_plot!(scene, (x_axis,)::NTuple{1,<:AbstractVector{T}}, stats_and_estimates::Vector{<:Tuple{<:Any,<:Estimated}}; 
-        title="", plotted_var_name::AbstractString, lims = nothing, 
-        metasweep_var_names::NTuple{1}, kwargs...) where T
-    # FIXME add title back
-    ax = MakieLayout.Axis(scene, xlabel=metasweep_var_names[1], 
-        ylabel=plotted_var_name)
-    full_statistics = map(est -> NaN_if_missing(Val(T), est[1]), stats_and_estimates)
-    est_means = map(est -> est[2].mean, stats_and_estimates)
-    est_bands = map(est -> est[2].band, stats_and_estimates)
-    all(isnan.(full_statistics)) && @warn "All NaN for full statistics!"
-    plot!(ax, x_axis, full_statistics; kwargs...)
-    errorbars!(ax, x_axis, est_means, est_bands)
-    plot!(ax, x_axis, est_means, color=:red, markersize=4)
-    if lims !== nothing
-        ylims!(ax, lims...)
-    end
-    return ax
-end
+# REQUIRES bootstrap.jl
+# function metasweep_plot!(scene, (x_axis,)::NTuple{1,<:AbstractVector{T}}, stats_and_estimates::Vector{<:Tuple{<:Any,<:Estimated}}; 
+#         title="", plotted_var_name::AbstractString, lims = nothing, 
+#         metasweep_var_names::NTuple{1}, kwargs...) where T
+#     # FIXME add title back
+#     ax = MakieLayout.Axis(scene, xlabel=metasweep_var_names[1], 
+#         ylabel=plotted_var_name)
+#     full_statistics = map(est -> NaN_if_missing(Val(T), est[1]), stats_and_estimates)
+#     est_means = map(est -> est[2].mean, stats_and_estimates)
+#     est_bands = map(est -> est[2].band, stats_and_estimates)
+#     all(isnan.(full_statistics)) && @warn "All NaN for full statistics!"
+#     plot!(ax, x_axis, full_statistics; kwargs...)
+#     errorbars!(ax, x_axis, est_means, est_bands)
+#     plot!(ax, x_axis, est_means, color=:red, markersize=4)
+#     if lims !== nothing
+#         ylims!(ax, lims...)
+#     end
+#     return ax
+# end
 
 function metasweep_plot!(scene::Scene, (x_axis, y_axis)::Tuple{<:AbstractVector{T},<:AbstractVector{T}}, vals::AbstractMatrix{T};  lims=nothing,
         title="fixme", plotted_var_name::AbstractString, 
@@ -44,43 +45,44 @@ function metasweep_plot!(scene::Scene, (x_axis, y_axis)::Tuple{<:AbstractVector{
         plt.colorrange = lims
     end
     tightlimits!(ax)
-    layout[1,2] = LColorbar(scene, plt, width=20, 
+    layout[1,2] =olorbar(scene, plt, width=20, 
         label=plotted_var_name)
     return layout
 end
 
-function metasweep_plot!(scene::Scene, (x_axis, y_axis)::Tuple{<:AbstractVector{T},<:AbstractVector{T}}, stats_and_estimates::AbstractMatrix{<:Tuple{<:Any,<:Estimated}};  lims=nothing,
-        title="fixme", plotted_var_name::AbstractString, 
-        metasweep_var_names::NTuple{2}, kwargs...) where {T<:Number}
-    layout = GridLayout()
-    layout[1,1] = ax = MakieLayout.Axis(scene,  
-        xlabel=metasweep_var_names[1],
-        ylabel=metasweep_var_names[2])
-    full_statistics = map(est -> NaN_if_missing(Val(T), est[1]), stats_and_estimates)
-    plt = heatmap!(ax, collect(x_axis), collect(y_axis), full_statistics; kwargs...)
-    tightlimits!(ax)
-    if lims !== nothing
-        plt.colorrange = lims
-    end
-    layout[1,2] = LColorbar(scene, plt, width=20, 
-        label=plotted_var_name)
-    return layout
-end
+# REQUIRES bootstrap.jl
+# function metasweep_plot!(scene::Scene, (x_axis, y_axis)::Tuple{<:AbstractVector{T},<:AbstractVector{T}}, stats_and_estimates::AbstractMatrix{<:Tuple{<:Any,<:Estimated}};  lims=nothing,
+#         title="fixme", plotted_var_name::AbstractString, 
+#         metasweep_var_names::NTuple{2}, kwargs...) where {T<:Number}
+#     layout = GridLayout()
+#     layout[1,1] = ax = MakieLayout.Axis(scene,  
+#         xlabel=metasweep_var_names[1],
+#         ylabel=metasweep_var_names[2])
+#     full_statistics = map(est -> NaN_if_missing(Val(T), est[1]), stats_and_estimates)
+#     plt = heatmap!(ax, collect(x_axis), collect(y_axis), full_statistics; kwargs...)
+#     tightlimits!(ax)
+#     if lims !== nothing
+#         plt.colorrange = lims
+#     end
+#     layout[1,2] = Colorbar(scene, plt, width=20, 
+#         label=plotted_var_name)
+#     return layout
+# end
 
-
-function extract_and_plot_metasweep!(scene, metasweep_values, bootstraps, 
-        extract_fn::Function; band_fn::Function, plot_kwargs...)
-    estimates = map(bootstraps) do bootstrap
-        full_estimate = extract_fn(bootstrap.result_from_full)
-        non_missing = skipmissing([extract_fn(result) for result in bootstrap.results_from_subsampling]) |> collect
-        if length(non_missing) < 2
-            return (full_estimate, Estimated(missing, missing))
-        end
-        estimate_band = band_fn(non_missing) 
-        return (full_estimate, Estimated(mean(non_missing), estimate_band))
-    end
-    return metasweep_plot!(scene, metasweep_values, estimates; plot_kwargs...)
-end
+# REQUIRES bootstrap.jl
+# function extract_and_plot_metasweep!(scene, metasweep_values, bootstraps, 
+#         extract_fn::Function; band_fn::Function, plot_kwargs...)
+#     estimates = map(bootstraps) do bootstrap
+#         full_estimate = extract_fn(bootstrap.result_from_full)
+#         non_missing = skipmissing([extract_fn(result) for result in bootstrap.results_from_subsampling]) |> collect
+#         if length(non_missing) < 2
+#             return (full_estimate, Estimated(missing, missing))
+#         end
+#         estimate_band = band_fn(non_missing) 
+#         return (full_estimate, Estimated(mean(non_missing), estimate_band))
+#     end
+#     return metasweep_plot!(scene, metasweep_values, estimates; plot_kwargs...)
+# end
 
 function plot_averaged_to_axes!(scene, data, axis_syms::NTuple{N,Symbol}) where N
     averaged_to_axes = _collapse_to_axes(data, axis_syms...)
