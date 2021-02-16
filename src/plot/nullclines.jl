@@ -1,4 +1,4 @@
-using WilsonCowanModel: wcm_du_defn, wcm_dv_defn, WCMParams, AbstractNullclineParams, wcm_nullcline_params
+using WilsonCowanModel: wcm_du_defn, wcm_dv_defn, WCMParams, AbstractNullclineParams, get_nullcline_params
 using Makie: @lift
 
 function lifted_wcm_param(;
@@ -71,7 +71,7 @@ end
 
 
 function calculate_fixedpoints(model::Union{AbstractModel{T},AbstractSimulation{T}}, phase_dx::T=0.01, phase_dy::T=phase_dx) where {T <: Number}
-    nullcline_params = wcm_nullcline_params(model)
+    nullcline_params = get_nullcline_params(model)
 
     @assert phase_dx == phase_dy
     us = 0.0:phase_dx:1.0

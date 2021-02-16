@@ -12,7 +12,7 @@ mods = (α=(0.4, 0.7), Aie=0.81, Aei=0.8, firing_θI=0.2, blocking_θI=0.5, save
 sim = prototype(; mods...)
 
 @show calculate_fixedpoints.(Ref(sim.model), [0.01, 0.001])
-params = wcm_nullcline_params(sim)
+params = get_nullcline_params(sim)
 
 nullcline_sc, nullcline_ly = nullclines(params, 0.01);
 display(nullcline_sc)
