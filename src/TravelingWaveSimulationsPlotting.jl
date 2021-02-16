@@ -14,10 +14,10 @@ using IterTools: product
 
 include("util/axisarray.jl")
 include("util/lines.jl")
-include("util/bootstrap.jl")
+#include("util/bootstrap.jl")
 include("util/fitting_sigmoid.jl")
 export PointVectorLine, Bootstrapped, Estimated
-using StatsBase: sample
+#using StatsBase: sample
 using Statistics: std, mean
 using HypothesisTests: OneSampleTTest, confint
 
