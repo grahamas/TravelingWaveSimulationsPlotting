@@ -104,7 +104,7 @@ function plot_nonlinearity!(scene::Scene, nonlinearities::Simulation73.AbstractP
     plots = [lines!(ax, xs, ys, width=3, color=color) 
         for (xs, ys, color) in zip(nonl_xs, nonl_ys, colors)]
     legend_names = ["$(pop)" for pop in pop_names]
-    leg = LLegend(scene, plots, legend_names,
+    leg = Legend(scene, plots, legend_names,
                   tellheight=false, tellwidth=false,
                   halign=:left, valign=:top, orientation=:vertical)
     layout[1,1] = leg

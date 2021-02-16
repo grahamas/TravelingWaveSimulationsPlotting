@@ -1,8 +1,8 @@
 function axisarray_heatmap!(scene::Scene, data::AxisArray, ax_labels=Union{Tuple,Nothing}, 
-        colorbar_width::Union{Nothing,Int}=nothing; hide_y=false)
+        colorbar_width::Union{Nothing,Int}=nothing; colorrange=extrema(get_data(data)), hide_y=false)
     sweep_ax = MakieLayout.Axis(scene)
     x, y = axes_keys(data)
-    heatmap = heatmap!(sweep_ax, x, y, get_data(data), colorrange=(0,1))
+    heatmap = heatmap!(sweep_ax, x, y, get_data(data), colorrange=colorrange)
     #tightlimits!(sweep_ax)
     if !(ax_labels isa Nothing)
         (x_sym, y_sym) = ax_labels
@@ -17,7 +17,7 @@ function axisarray_heatmap!(scene::Scene, data::AxisArray, ax_labels=Union{Tuple
     sublayout = GridLayout()
     sublayout[1,1] = sweep_ax
     if colorbar_width !== nothing && abs(-(extrema(data)...)) != 0
-        sublayout[1,2] = LColorbar(scene, heatmap, width=colorbar_width)
+        sublayout[1,2] = Colorbar(scene, heatmap, width=colorbar_width)
     end
 
     return sublayout

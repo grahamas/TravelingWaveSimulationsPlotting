@@ -30,6 +30,9 @@ end
 
 function plot_and_save(plot_fn!, args...; 
         unique_id="$(Dates.now())",
+        session_id=unique_id,
+        session_name="unnnamedsession",
+        plots_subdir=plotsdir("$(session_name)_$(session_id)"),
         plot_name = "$(strip(string(plot_fn!), '!'))_$(unique_id).png",
         scene_resolution=(1600, 1600),
         kwargs...)
@@ -37,7 +40,7 @@ function plot_and_save(plot_fn!, args...;
 
     layout[1,1] = plot_fn!(scene, args...; kwargs...)
 
-    _save!(scene, plot_name; unique_id=unique_id)
+    _save!(scene, plot_name; unique_id=unique_id, session_id=session_id, session_name=session_name, plots_subdir=plots_subdir)
 
     return scene
 end
@@ -59,9 +62,6 @@ function plot_and_save_many(plot_fn, args...;
     end
     return scenes
 end
-
-import AbstractPlotting: convert_arguments
-convert_arguments(est::Estimated) = (est.estimate,)
 
 function layout_plot(plot_fn, args...; kwargs...)
     scene, layout = layoutscene()
