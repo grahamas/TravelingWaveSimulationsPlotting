@@ -5,7 +5,7 @@ using DrWatson
 using Makie
 using AbstractPlotting: MakieLayout
 using AbstractPlotting.MakieLayout
-using TravelingWaveSimulations, Simulation73, NeuralModels, Simulation73Plotting
+using TravelingWaveSimulations, Simulation73, NeuralModels, Simulation73Plotting, WilsonCowanModel
 using Interpolations, DiffEqOperators, Optim, LinearAlgebra
 using AxisIndices
 using StaticArrays
@@ -29,13 +29,17 @@ export heatmap_sweep_with_target,
     figure_contrast_monotonic_blocking_all, 
     figure_example_contrast_monotonic_blocking_all,
     save_figure_example_contrast_monotonic_blocking_all,
-    plot_and_save, layout_plot
+    plot_and_save, layout_plot, figure_plot
 include("plot/axisarray.jl")
 export axisarray_heatmap!
 include("plot/metasweep.jl")
 include("plot/nullclines.jl")
 export nullclines, nullclines!,
     calculate_fixedpoints
+include("plot/connectivity.jl")
+export plot_connectivity!
+include("plot/nonlinearity.jl")
+export plot_nonlinearity!
 
 include("figures/binarization.jl")
 include("figures/sigmoid_fit.jl")

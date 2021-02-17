@@ -1,8 +1,6 @@
 using Simulation73, NeuralModels
 using NeuralModels: AbstractSigmoidNonlinearityParameter, AbstractDifferenceOfSigmoidsParameter
 
-using AbstractPlotting
-
 TOL = 0.001
 
 function _bounds_fns(nonl::NeuralModels.NonlinearityParameterWrapperAction, args...)
@@ -86,29 +84,28 @@ function AbstractPlotting.convert_arguments(P::Type{<:AbstractPlot}, pops::Simul
     return _auto_range(Simulation73.array(pops))
 end
 
-plot_nonlinearity!(scene::Scene, sim::Simulation, args...; kwargs...) = plot_nonlinearity!(scene, sim.model, args...; kwargs...)
+plot_nonlinearity!(fig::Figure, sim::Simulation, args...; kwargs...) = plot_nonlinearity!(fig, sim.model, args...; kwargs...)
 
-plot_nonlinearity!(scene::Scene, model::AbstractModel, args...; kwargs...) = plot_nonlinearity!(scene, model.nonlinearity, args...; pop_names=model.pop_names, kwargs...)
+plot_nonlinearity!(fig::Figure, model::AbstractModel, args...; kwargs...) = plot_nonlinearity!(fig, model.nonlinearity, args...; pop_names=model.pop_names, kwargs...)
 
 using Colors
-function plot_nonlinearity!(scene::Scene, nonlinearities::Simulation73.AbstractPopulationP;
+function plot_nonlinearity!(fig::Figure, nonlinearities::Simulation73.AbstractPopulationP;
         pop_names,
         title="Population activation functions")
-    layout = GridLayout()
 
     nonl_xs, nonl_ys = _auto_range(nonlinearities |> Simulation73.array)
-    @show nonl_xs
-    ax = layout[1,1] = MakieLayout.Axis(scene, xlabel="input (a.u.)", ylabel="pop. activity (proportion)", title=title)
-    @show parse(Colorant, ax.attributes[:backgroundcolor][])
+    ax = MakieLayout.Axis(fig, xlabel="input (a.u.)", ylabel="pop. activity (proportion)", title=title)
     colors = distinguishable_colors(length(pop_names), parse(Colorant, ax.attributes[:backgroundcolor][]), dropseed=true)
     plots = [lines!(ax, xs, ys, width=3, color=color) 
         for (xs, ys, color) in zip(nonl_xs, nonl_ys, colors)]
+    ylims!(ax, 0.0, 1.0)
+    hidespines!(ax, :l)
+    ax.yticks = [0, 1]
     legend_names = ["$(pop)" for pop in pop_names]
-    leg = Legend(scene, plots, legend_names,
+    axislegend(ax, plots, legend_names,
                   tellheight=false, tellwidth=false,
-                  halign=:left, valign=:top, orientation=:vertical)
-    layout[1,1] = leg
+                  position=:lt, orientation=:vertical)
 
-    layout
+    ax
 end
 

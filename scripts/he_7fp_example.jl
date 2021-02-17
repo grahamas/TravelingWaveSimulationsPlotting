@@ -1,8 +1,6 @@
 using TravelingWaveSimulations, WilsonCowanModel, TravelingWaveSimulationsPlotting, Simulation73Plotting,
         DrWatson
 
-include("../_drafts/plot_nonlinearity.jl")
-
 # prototype = get_prototype("full_dynamics_monotonic")
 # sim = prototype()
 
@@ -20,18 +18,37 @@ sim = prototype(; mods...)
 @show calculate_fixedpoints.(Ref(sim.model), [0.01, 0.001])
 params = get_nullcline_params(sim)
 
+# nullcline_scene, nullcline_ly = nullclines(params, 0.01);
+# save(joinpath(example_dir, "$(example_name)_nullclines.png"), nullcline_scene)
+using Makie
+ggplot_theme = Theme(
+    linewidth = 200,
+    Axis = (
+        backgroundcolor = :white,
+        leftspinevisible = true,
+        rightspinevisible = false,
+        bottomspinevisible = true,
+        topspinevisible = false,
+        xgridcolor = :white,
+        ygridcolor = :white,
+    )
+)
 
-nullcline_scene, nullcline_ly = nullclines(params, 0.01);
-save(joinpath(example_dir, "$(example_name)_nullclines.png"), nullcline_scene)
+with_theme(ggplot_theme) do 
+    nonlinearity_figure = figure_plot(plot_nonlinearity!, sim; resolution = (800, 800));
+    save(joinpath(example_dir, "$(example_name)_nonlinearity.png"), nonlinearity_figure)
 
-nonl_scene, nonl_layout = layout_plot(plot_nonlinearity!, sim);
-save(joinpath(example_dir, "$(example_name)_nonlinearity.png"), nonl_scene)
-
-for stim_strength in stim_strengths
-    sim = prototype(; mods..., stim_strength=stim_strength)
-    exec = execute(sim);
-    exec_scene = exec_heatmap(exec);
-    save(joinpath(example_dir, "$(example_name)_heatmap_strength$(stim_strength).png"), exec_scene)
+    connectivity_figure = figure_plot(plot_connectivity!, sim; resolution = (800, 800), xlims=[-200., 200.]);
+    save(joinpath(example_dir, "$(example_name)_connectivity.png"), connectivity_figure)
 end
+
+
+
+# for stim_strength in stim_strengths
+#     sim = prototype(; mods..., stim_strength=stim_strength)
+#     exec = execute(sim);
+#     exec_scene = exec_heatmap(exec);
+#     save(joinpath(example_dir, "$(example_name)_heatmap_strength$(stim_strength).png"), exec_scene)
+# end
 
 end

@@ -68,3 +68,9 @@ function layout_plot(plot_fn, args...; kwargs...)
     layout[1,1] =  plot_fn(scene, args...; kwargs...)
     return (scene, layout)
 end
+
+function figure_plot(plot_fn, args...; resolution = nothing, kwargs...)
+    figure = resolution === nothing ? Figure() : Figure(resolution = resolution)
+    figure[1,1] =  plot_fn(figure, args...; kwargs...)
+    return figure
+end
