@@ -1,26 +1,28 @@
-using TravelingWaveSimulations, WilsonCowanModel, TravelingWaveSimulationsPlotting, Simulation73Plotting,
-        DrWatson, Simulation73
-
-# prototype = get_prototype("full_dynamics_monotonic")
-# sim = prototype()
-
-# params = HE2018Params(sim)
+using DrWatson
+using TravelingWaveSimulations, WilsonCowanModel, 
+    TravelingWaveSimulationsPlotting, 
+    Simulation73Plotting, Simulation73
 using Dates
+using Makie
 
 let example_name = "he_blocking_7fp",
     session_id = "$(Dates.now())",
     example_dir = mkpath(plotsdir("$(example_name)_$(session_id)")),
-    stim_strengths = [0.0, 0.02, 0.05, 0.07, 0.1];
+    stim_strengths = [0.0, 0.02, 0.1],
+    figure_resolution = (3000, 1600);
 prototype = get_prototype("full_dynamics_blocking")
-mods = (α=(0.4, 0.7), Aie=0.81, Aei=0.8, firing_θI=0.2, blocking_θI=0.5, save_idxs=nothing, save_on=true, saveat=0.1, stop_time=4.) 
+mods = (α=(0.4, 0.7), 
+        Aie=0.81, Aei=0.8, 
+        firing_θI=0.2, θI=0.2, blocking_θI=0.5, 
+        save_idxs=nothing, save_on=true, saveat=0.1, 
+        stop_time=4., x_lattice=256., n_lattice=512) 
 sim = prototype(; mods...)
 
 @show calculate_fixedpoints.(Ref(sim.model), [0.01, 0.001])
-params = get_nullcline_params(sim)
-
+# params = get_nullcline_params(sim)
 # nullcline_scene, nullcline_ly = nullclines(params, 0.01);
 # save(joinpath(example_dir, "$(example_name)_nullclines.png"), nullcline_scene)
-using Makie
+
 simple_theme = Theme(
     linewidth = 20.0,
     Axis = (
@@ -35,7 +37,7 @@ simple_theme = Theme(
 )
 
 with_theme(simple_theme) do 
-    fig = Figure(resolution = (3000, 1600))
+    fig = Figure(resolution = figure_resolution)
     fig[1,1] = plot_nonlinearity!(fig, sim; title=nothing)
     fig[2,1] = plot_connectivity!(fig, sim; xlims=[-200, 200], title=nothing)
     fig[1:2,2] = plot_stimulus!(fig, sim)
