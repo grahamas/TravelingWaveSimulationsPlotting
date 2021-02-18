@@ -12,8 +12,10 @@ function plot_connectivity!(fig::Figure, simulation::Simulation{T,M};
         kwargs...) where {T, M<:AbstractWilsonCowanModel{T,1}}
     ax = AbstractPlotting.Axis(fig,
               xlabel = xlabel, # FIXME encode units in simulation
-              ylabel = ylabel,
-              title = title)
+              ylabel = ylabel)
+    if title !== nothing
+        ax.title = title
+    end
     pop_names = simulation.model.pop_names
     n_pops = length(pop_names)
     colors = distinguishable_colors(n_pops,

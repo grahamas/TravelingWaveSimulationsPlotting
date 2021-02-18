@@ -94,7 +94,10 @@ function plot_nonlinearity!(fig::Figure, nonlinearities::Simulation73.AbstractPo
         title="Population activation functions")
 
     nonl_xs, nonl_ys = _auto_range(nonlinearities |> Simulation73.array)
-    ax = MakieLayout.Axis(fig, xlabel="input (a.u.)", ylabel="pop. activity (proportion)", title=title)
+    ax = MakieLayout.Axis(fig, xlabel="input (a.u.)", ylabel="pop. activity (proportion)")
+    if title !== nothing
+        ax.title = title
+    end
     colors = distinguishable_colors(length(pop_names), parse(Colorant, ax.attributes[:backgroundcolor][]), dropseed=true)
     plots = [lines!(ax, xs, ys, width=3, color=color) 
         for (xs, ys, color) in zip(nonl_xs, nonl_ys, colors)]
