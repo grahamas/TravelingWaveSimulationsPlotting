@@ -40,6 +40,8 @@ include("plot/connectivity.jl")
 export plot_connectivity!
 include("plot/nonlinearity.jl")
 export plot_nonlinearity!
+include("plot/stimulus.jl")
+export plot_stimulus!
 
 include("figures/binarization.jl")
 include("figures/sigmoid_fit.jl")
