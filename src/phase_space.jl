@@ -43,7 +43,7 @@ function reduce_2d_and_steepest_line_and_histogram!(
     layout = GridLayout()
 
     title_facet = Label(scene, facet_title, textsize=titlesize, tellwidth=false)
-    sweep_sublayout = axisarray_heatmap!(scene, data, colorbar_width)
+    sweep_sublayout = axisarray_heatmap!(scene, data; colorbar_width = colorbar_width)
     reduction_sublayout = plot_reduction!(scene, slice, data, get_content(sweep_sublayout, 1, 1))
     if isnothing(reduction_sublayout)
         reduction_sublayout = MakieLayout.Axis(scene)

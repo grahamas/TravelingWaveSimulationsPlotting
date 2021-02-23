@@ -29,11 +29,11 @@ prototype = get_prototype("full_dynamics_$(nonl_type)")
     calculate_fixedpoints(sim.model);
 end
 
-fp_arr = NamedAxisArray{(:Aee, :Aei, :Aie, :Aii)}(fp_arr, A_range, A_range, A_range, A_range) # ATTN order comes from map arg destructuring above
+fp_count_arr = NamedAxisArray{(:Aee, :Aei, :Aie, :Aii)}(length.(fp_arr), A_range, A_range, A_range, A_range) # ATTN order comes from map arg destructuring above
 
 
 n_fps = 0:7
-fp_count = [count(fp_arr .== x) for x in n_fps]
+fp_count = [count(fp_count_arr .== x) for x in n_fps]
 max_log = log10.(fp_count) |> maximum |> mx -> ceil(Int, mx)
 
 sc, ly = layoutscene(); ly[1,1] = ax = MakieLayout.Axis(sc);

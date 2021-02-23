@@ -30,13 +30,15 @@ mkpath(plots_subdir)
 for (nonl_type, fp_arr) in fp_arrs
     for visible_axes in possible_visible_axes
         smushed_arr = _collapse_to_axes(fp_arr, visible_axes...)
-        plot_and_save(axisarray_heatmap!, smushed_arr, colorbar_width;
+        plot_and_save(axisarray_heatmap!, smushed_arr; 
+            colorbar_width = colorbar_width,
             plot_name="fpcount_$(nonl_type)_$(join(visible_axes, "_")).png",
             plots_subdir=plots_subdir, colorrange=(0,7))
         for fp_count in possible_fp_counts
             smushed_count_arr = _collapse_to_axes(fp_arr .== fp_count, 
                                             visible_axes...)
-            plot_and_save(axisarray_heatmap!, smushed_count_arr, colorbar_width;
+            plot_and_save(axisarray_heatmap!, smushed_count_arr;
+                colorbar_width = colorbar_width,
                 plot_name="fpcountequals$(fp_count)_$(nonl_type)_$(join(visible_axes, "_")).png",
                 plots_subdir=plots_subdir)
         end
@@ -50,13 +52,15 @@ fp_diff_arr = fp_arrs[blocking_idx][2] .- fp_arrs[monotonic_idx][2]
 
 for visible_axes in possible_visible_axes
     smushed_arr = _collapse_to_axes(fp_diff_arr, visible_axes...)
-    plot_and_save(axisarray_heatmap!, smushed_arr, colorbar_width;
+    plot_and_save(axisarray_heatmap!, smushed_arr; 
+            colorbar_width = colorbar_width,
             plot_name="fpdiff_$(join(visible_axes, "_")).png",
             plots_subdir=plots_subdir)
     for fp_diff in minimum(fp_diff_arr):1:maximum(fp_diff_arr)
         smushed_count_arr = _collapse_to_axes(fp_diff_arr .== fp_diff, 
                                         visible_axes...)
-        plot_and_save(axisarray_heatmap!, smushed_count_arr, colorbar_width;
+        plot_and_save(axisarray_heatmap!, smushed_count_arr;
+            colorbar_width = colorbar_width,
             plot_name="fpdiffequals$(fp_diff)_$(join(visible_axes, "_")).png",
             plots_subdir=plots_subdir)
     end

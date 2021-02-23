@@ -45,7 +45,12 @@ function calculate_fixedpoints(mdb_path::AbstractString, new_mods::NamedTuple{NA
     combined_mods = merge(saved_mods, Dict(pairs(new_mods))) # overwrites saved_mods
     
     variable_mod_names, variable_mod_values = zip([(name, values) for (name,values) in pairs(combined_mods) if length(values)!= 1]...)
-    n_fixedpoints_arr = NamedAxisArray{variable_mod_names}(zeros(Int, length.(variable_mod_values)...), variable_mod_values...)
+    fixedpoints_arr = NamedAxisArray{variable_mod_names}(
+        Array{Vector{SVector{2,T}},length(variable_mod_values)}(
+            undef, length.(variable_mod_values)...
+        ), 
+        variable_mod_values...
+    )
 
     prototype = get_prototype(prototype_name)
 
@@ -55,11 +60,17 @@ function calculate_fixedpoints(mdb_path::AbstractString, new_mods::NamedTuple{NA
         mods = (combined_mods..., fixing_mods..., save_idxs=nothing, save_on=true)
         #write_modifications!(plots_subdir, mods, unique_id)
         model = prototype(; mods...)
-        setindex!(n_fixedpoints_arr, calculate_fixedpoints(model, dx); fixing_mods...)
+        setindex!(fixedpoints_arr, calculate_fixedpoints(model, dx); fixing_mods...)
     end
-    return n_fixedpoints_arr, combined_mods, prototype
+    return fixedpoints_arr, combined_mods, prototype
 end
 
+using Roots
+function Roots.find_zero(fn::Function, (p1,p2)::Tuple{PT,PT}, args...) where {N,T, PT<:SVector{N,T}}
+    interp(x) = x .* p1 .+ (1-x) .* p2
+    interp_zero = find_zero(x -> fn(interp(x)), (0, 1), args...)
+    return interp(interp_zero)
+end
 
 function calculate_fixedpoints(model::Union{AbstractModel{T},AbstractSimulation{T}}, phase_dx::T=0.01, phase_dy::T=phase_dx) where {T <: Number}
     nullcline_params = get_nullcline_params(model)
@@ -74,27 +85,32 @@ function calculate_fixedpoints(model::Union{AbstractModel{T},AbstractSimulation{
     u_nullclines = lines(contour(us, vs, dus, 0.))
     v_nullclines = lines(contour(us, vs, dvs, 0.))
 
-    n_intersections = 0
-    prev_point = [NaN, NaN]
+    intersections = []
+    prev_point = SVector{2,Float64}(NaN, NaN)
     for u_line in u_nullclines
         prev_dv = 0
         for point in u_line.vertices
             du = wcm_du_defn(point..., nullcline_params)
             dv = wcm_dv_defn(point..., nullcline_params)
             if isapprox(du, 0., atol=eps()) && isapprox(dv, 0., atol=eps())
-                n_intersections += 1
+                push!(intersections, point)
             elseif wcm_dv_defn(point..., nullcline_params) * prev_dv < 0
                 # crossed zeros
                 # find_zero_solution(prev_point, point, )
                 # FIXME save the found solution for future comparison?
-                n_intersections += 1
+                push!(intersections, 
+                    find_zero( # just finds dv 0 bc in theory points define du=0
+                        pt -> wcm_dv_defn(pt..., nullcline_params), 
+                        (prev_point, point)
+                    )
+                )
             end
-            prev_point .= point
+            prev_point = point
             prev_dv = dv
         end
     end
 
-    return n_intersections
+    return intersections
 end
 
 function nt_index(arr::NamedAxisArray{nt_names}, idx) where nt_names

@@ -1,6 +1,12 @@
-function axisarray_heatmap!(scene::Scene, data::AxisArray, ax_labels=Union{Tuple,Nothing}, 
-        colorbar_width::Union{Nothing,Int}=nothing; colorrange=extrema(get_data(data)), hide_y=false)
-    sweep_ax = MakieLayout.Axis(scene)
+_round_extrema((x1, x2); sigdigits) = (floor(x1, sigdigits=sigdigits), ceil(x2, sigdigits=sigdigits))
+function axisarray_heatmap!(fig::Figure, data::AxisArray, 
+        ax_labels=Union{Tuple,Nothing}, 
+        ; colorbar_width::Union{Nothing,Int}=nothing,
+        colorrange=_round_extrema(extrema(get_data(data)), sigdigits=2),
+        hide_y=false,
+        colorbar_label=""
+    )
+    sweep_ax = AbstractPlotting.Axis(fig)
     x, y = axes_keys(data)
     heatmap = heatmap!(sweep_ax, x, y, get_data(data), colorrange=colorrange)
     #tightlimits!(sweep_ax)
@@ -17,14 +23,16 @@ function axisarray_heatmap!(scene::Scene, data::AxisArray, ax_labels=Union{Tuple
     sublayout = GridLayout()
     sublayout[1,1] = sweep_ax
     if colorbar_width !== nothing && abs(-(extrema(data)...)) != 0
-        sublayout[1,2] = Colorbar(scene, heatmap, width=colorbar_width)
+        sublayout[1,2] = Colorbar(fig, heatmap, 
+        width=colorbar_width, label=colorbar_label,
+        ticks=[colorrange...])
     end
 
     return sublayout
 end
 
-function axisarray_heatmap!(scene::Scene, data::NamedAxisArray, args...; kwargs...)
-    axisarray_heatmap!(scene, data.data, _namedaxisarray_names(data), args...; kwargs...)
+function axisarray_heatmap!(fig::Figure, data::NamedAxisArray, args...; kwargs...)
+    axisarray_heatmap!(fig, data.data, _namedaxisarray_names(data), args...; kwargs...)
 end
 
 

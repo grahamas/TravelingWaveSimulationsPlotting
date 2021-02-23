@@ -19,7 +19,7 @@ function plot_connectivity!(fig::Figure, simulation::Simulation{T,M};
     pop_names = simulation.model.pop_names
     n_pops = length(pop_names)
     colors = distinguishable_colors(n_pops,
-                                    parse(Colorant, ax.attributes[:backgroundcolor][]),
+                                    parse(Colorant, [ax.attributes[:backgroundcolor][], ax.attributes[:foregroundcolor][]]),
                                     dropseed=true)
     raw_space = simulation.space
     midpoint_idx = NeuralModels.fft_center_idx(raw_space)

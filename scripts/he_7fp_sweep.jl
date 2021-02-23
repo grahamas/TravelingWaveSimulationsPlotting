@@ -27,7 +27,7 @@ prototype = get_prototype("full_dynamics_blocking")
 end
 
 n_fps = 0:7
-fp_count = [count(fp_arr .== x) for x in n_fps]
+fp_count = [count(length.(fp_arr) .== x) for x in n_fps]
 max_log = log10.(fp_count) |> maximum |> mx -> ceil(Int, mx)
 
 sc, ly = layoutscene(); ly[1,1] = ax = MakieLayout.Axis(sc);
