@@ -27,3 +27,5 @@ plots
 
 *.mem
 *.mp4
+
+*.bson

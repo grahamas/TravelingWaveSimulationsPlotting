@@ -9,7 +9,7 @@ using TravelingWaveSimulations, Simulation73, NeuralModels, Simulation73Plotting
 using Interpolations, DiffEqOperators, Optim, LinearAlgebra
 using AxisIndices
 using StaticArrays
-using Contour: contour, lines, coordinates
+using Contour: contour, lines, coordinates, Curve2
 using IterTools: product
 
 include("util/axisarray.jl")
@@ -20,6 +20,8 @@ export PointVectorLine, Bootstrapped, Estimated
 #using StatsBase: sample
 using Statistics: std, mean
 using HypothesisTests: OneSampleTTest, confint
+include("util/sweep.jl")
+export sweep_calculate_fixedpoints
 
 include("space_reduction.jl")
 include("phase_space.jl")
@@ -32,10 +34,12 @@ export heatmap_sweep_with_target,
     plot_and_save, layout_plot, figure_plot
 include("plot/axisarray.jl")
 export axisarray_heatmap!
-include("plot/metasweep.jl")
+include("plot/sweep.jl")
+export sweep_calculate_fixedpoints_and_plot
 include("plot/nullclines.jl")
 export plot_nullclines!,
-    calculate_fixedpoints
+    calculate_fixedpoints,
+    calculate_fixedpoints!
 include("plot/connectivity.jl")
 export plot_connectivity!
 include("plot/nonlinearity.jl")

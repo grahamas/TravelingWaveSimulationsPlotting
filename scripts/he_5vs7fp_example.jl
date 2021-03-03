@@ -2,25 +2,58 @@ using DrWatson
 using TravelingWaveSimulations, WilsonCowanModel, 
     TravelingWaveSimulationsPlotting, 
     Simulation73Plotting, Simulation73
-using TravelingWaveSimulationsPlotting: _collapse_to_axes
+using TravelingWaveSimulationsPlotting: _collapse_to_axes, calculate_fixedpoints
 using Dates
 using Makie
+using StaticArrays
+using AxisIndices, NamedDims
 
 include(projectdir("_drafts/grouped_bar_plot.jl"))
 
-if !@isdefined(blocking_fp_arr)
-    @warn "Calculating blocking_fp_arr..."
-    include(scriptsdir("he_blocking_fp_sweep.jl"))
-    blocking_fp_count_arr = length.(blocking_fp_arr)
-    @warn "done."
+if !@isdefined(refresh_sweep_arrs)
+    refresh_sweep_arrs = false
 end
 
-if !@isdefined(mono_fp_arr)
-    @warn "Calculating monotonic_fp_arr..."
-    include(scriptsdir("he_monotonic_fp_sweep.jl"))
-    mono_fp_count_arr = length.(mono_fp_arr)
-    @warn "done."
+if !@isdefined(blocking_fp_arr) || !@isdefined(monotonic_fp_arr) || refresh_sweep_arrs
+    A_range = 0.1:0.1:1.5
+    sweeping_mods = (Aee=A_range, Aei=A_range, Aie=A_range, Aii=A_range)
+    static_mods = (
+        α=(0.4, 0.7), 
+        firing_θI=0.2, blocking_θI=0.5, 
+        n_lattice = 2,
+        save_idxs=nothing, save_on=true, saveat=0.1
+    ) 
+    file, filename = produce_or_load(datadir(), []; 
+        prefix = "blocking_fp_arr",
+        force = refresh_sweep_arrs
+    ) do c
+        blocking_fp_arr = sweep_calculate_fixedpoints(
+            "full_dynamics_blocking", 
+            static_mods,
+            sweeping_mods,
+            ; 
+            dx = 0.01
+        )
+        return @dict(blocking_fp_arr)
+    end
+    @unpack blocking_fp_arr = file
+    file, filename = produce_or_load(datadir(), []; 
+        prefix = "monotonic_fp_arr",
+        force = refresh_sweep_arrs
+    ) do c
+        monotonic_fp_arr = sweep_calculate_fixedpoints(
+            "full_dynamics_monotonic", 
+            static_mods,
+            sweeping_mods,
+            ; 
+            dx = 0.01
+        )
+        return @dict(monotonic_fp_arr)
+    end
+    @unpack monotonic_fp_arr = file
 end
+
+refresh_sweep_arrs = false
 
 let example_name = "he_5vs7fp",
     session_id = "$(Dates.now())",
@@ -28,6 +61,9 @@ let example_name = "he_5vs7fp",
     stim_strengths = [0.0, 0.02, 0.1],
     figure_resolution = (3000, 1600),
     colorbar_width = 25;
+
+blocking_fp_count_arr=length.(blocking_fp_arr)
+monotonic_fp_count_arr=length.(monotonic_fp_arr)
 
 mods = (α=(0.4, 0.7), 
     Aie=0.81, Aei=0.8, 
@@ -50,17 +86,32 @@ simple_theme = Theme(
     )
 )
 nonl_type_strings = ["monotonic", "blocking"]
+#nonl_type_strings = ["blocking"]
 
 with_theme(simple_theme) do 
     fig = Figure(resolution = figure_resolution)
     for (i_nonl_type, nonl_type_string) ∈ enumerate(nonl_type_strings)
         prototype = get_prototype("full_dynamics_$(nonl_type_string)");
         sim = prototype(; mods...)
+        params = get_nullcline_params(sim)
 
         # test that the FP counter isn't unstable near this model
-        @assert reduce(==, length(calculate_fixedpoints.(Ref(sim.model), [0.01, 0.001])))
-        params = get_nullcline_params(sim)
-        fig[i_nonl_type, 1] = plot_nullclines!(fig, params, 0.01)
+        #test_resolutions = [0.01, 0.007, 0.003, 0.001]
+        test_resolutions = [0.007, 0.003]
+        test_fp_counts = length.(calculate_fixedpoints.(Ref(sim.model), test_resolutions))
+        a_test_is_different = !reduce(==, test_fp_counts)
+        @show a_test_is_different
+        
+        if a_test_is_different || !isodd(test_fp_counts[begin]) 
+            @show calculate_fixedpoints.(Ref(sim.model), test_resolutions) .|> length
+            fig[1,1] = plot_nullclines!(fig, params, 0.01)
+            fig[2,1] = plot_nullclines!(fig, params, 0.007)
+            fig[1,2] = plot_nullclines!(fig, params, 0.003)
+            fig[2,2] = plot_nullclines!(fig, params, 0.001)
+            display(fig)
+            error("assert failed.")
+        end
+        fig[i_nonl_type, 1] = plot_nullclines!(fig, params, 0.007)
         execs_by_stim_strength = [
             execute(prototype(; mods..., stim_strength=stim_strength)) 
             for stim_strength ∈ stim_strengths
@@ -76,16 +127,14 @@ with_theme(simple_theme) do
     summary_fig_layout = GridLayout()
 
     # Histogram of #fixed points
-    fp_hist_ax = let fig = fig,
-            blocking_fp_arr = blocking_fp_arr,
-            mono_fp_arr = mono_fp_arr;
+    fp_hist_ax = let fig = fig
         n_fps = 0:7
         blocking_fp_count_hist = [log10(count(blocking_fp_count_arr .== x)) for x in n_fps]
-        mono_fp_count_hist = [log10(count(mono_fp_count_arr .== x)) for x in n_fps]
-        max_log = vcat(blocking_fp_count_hist, mono_fp_count_hist) |> maximum |> mx -> ceil(Int, mx)
+        monotonic_fp_count_hist = [log10(count(monotonic_fp_count_arr .== x)) for x in n_fps]
+        max_log = vcat(blocking_fp_count_hist, monotonic_fp_count_hist) |> maximum |> mx -> ceil(Int, mx)
 
         ax = AbstractPlotting.Axis(fig)
-        gbp = groupedbarplot!(ax, n_fps, [mono_fp_count_hist, blocking_fp_count_hist])
+        gbp = groupedbarplot!(ax, n_fps, [monotonic_fp_count_hist, blocking_fp_count_hist])
         gbp_labels = ["mono", "block"]
         tightlimits!(ax)
         xlims!(ax, n_fps[begin]-0.5,n_fps[end]+0.5)
@@ -101,7 +150,7 @@ with_theme(simple_theme) do
         ax
     end # let fp_hist_ax
 
-    fp_diff_arr = blocking_fp_count_arr .- mono_fp_count_arr
+    fp_diff_arr = blocking_fp_count_arr .- monotonic_fp_count_arr
 
     # Heatmap of difference #FP(block - mono) == target_fp_diff
     fp_diff_count_ax = let fig = fig,
