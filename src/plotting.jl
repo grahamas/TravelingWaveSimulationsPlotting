@@ -15,7 +15,7 @@ NaN_if_missing(::Val{T}, ::Missing) where {T} = T(NaN)
 NaN_if_missing(::Val{T}, val::T) where {T} = val
 
 
-function _save!(scene, plot_name;
+function _save!(fig, plot_name;
         unique_id="$(Dates.now())",
         session_id=unique_id,
         session_name="unnnamedsession",
@@ -23,8 +23,8 @@ function _save!(scene, plot_name;
     mkpath(plots_subdir)
     save_path = plotsdir(plots_subdir, plot_name)
     @info "saving $save_path"
-    Makie.save(save_path, scene)
-    return scene
+    Makie.save(save_path, fig)
+    return fig
 end
 
 
@@ -34,15 +34,15 @@ function plot_and_save(plot_fn!, args...;
         session_name="unnnamedsession",
         plots_subdir=plotsdir("$(session_name)_$(session_id)"),
         plot_name = "$(strip(string(plot_fn!), '!'))_$(unique_id).png",
-        scene_resolution=(1600, 1600),
+        figure_resolution=(1600, 1600),
         kwargs...)
-    scene, layout = layoutscene(resolution=scene_resolution)
+    figure = Figure(resolution=figure_resolution)
 
-    layout[1,1] = plot_fn!(scene, args...; kwargs...)
+    figure[1,1] = plot_fn!(figure, args...; kwargs...)
 
-    _save!(scene, plot_name; unique_id=unique_id, session_id=session_id, session_name=session_name, plots_subdir=plots_subdir)
+    _save!(figure, plot_name; unique_id=unique_id, session_id=session_id, session_name=session_name, plots_subdir=plots_subdir)
 
-    return scene
+    return figure
 end
 
 export plot_and_save_many
@@ -52,21 +52,21 @@ function plot_and_save_many(plot_fn, args...;
         session_name="unnnamedsession",
         session_id=unique_id,
         kwargs...)
-    "Like plot_and_save, but assuming plot_fn! returns many scenes"
+    "Like plot_and_save, but assuming plot_fn! returns many figures"
 
-    scenes = map(plot_fn(args...; kwargs...)) do (scene, layout, name)
-        _save!(scene, "$(name)_$(plot_name)";
+    figs = map(plot_fn(args...; kwargs...)) do (fig, layout, name)
+        _save!(fig, "$(name)_$(plot_name)";
             session_id=session_id,
             session_name=session_name)
-        scene
+        fig
     end
-    return scenes
+    return figs
 end
 
 function layout_plot(plot_fn, args...; kwargs...)
-    scene, layout = layoutscene()
-    layout[1,1] =  plot_fn(scene, args...; kwargs...)
-    return (scene, layout)
+    fig = Figure()
+    fig[1,1] =  plot_fn(fig, args...; kwargs...)
+    return (fig, layout)
 end
 
 function figure_plot(plot_fn, args...; resolution = nothing, kwargs...)
