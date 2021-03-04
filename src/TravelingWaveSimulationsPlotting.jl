@@ -11,6 +11,7 @@ using AxisIndices
 using StaticArrays
 using Contour: contour, lines, coordinates, Curve2
 using IterTools: product
+using LoopVectorization
 
 include("util/axisarray.jl")
 include("util/lines.jl")
@@ -24,6 +25,9 @@ include("util/sweep.jl")
 export sweep_calculate_fixedpoints
 include("util/metrics.jl")
 export epilepsy_metric
+include("util/fixedpoints.jl")
+export calculate_fixedpoints,
+    calculate_fixedpoints!
 
 include("space_reduction.jl")
 include("phase_space.jl")
@@ -39,9 +43,7 @@ export axisarray_heatmap!
 include("plot/sweep.jl")
 export sweep_calculate_fixedpoints_and_plot
 include("plot/nullclines.jl")
-export plot_nullclines!,
-    calculate_fixedpoints,
-    calculate_fixedpoints!
+export plot_nullclines!
 include("plot/connectivity.jl")
 export plot_connectivity!
 include("plot/nonlinearity.jl")
