@@ -2,11 +2,15 @@ using WilsonCowanModel: wcm_du_defn, wcm_dv_defn, WCMParams, AbstractNullclinePa
 using Makie: @lift
 
 using DataStructures: MutableLinkedList, ListNode, length
+struct NodeList{T,MLL<:MutableLinkedList{T}}
+    mll::MLL
+    NodeList{T}() where T = NodeList(MutableLinkedList{T}())
+end
 
 
-Base.iterate(l::MutableLinkedList) = l.len == 0 ? nothing : (l.node.next, l.node.next.next)
-Base.iterate(l::MutableLinkedList, n::ListNode) = n === l.node ? nothing : (n, n.next)
-collect_array(l::MutableLinkedList) = [node.data for node in l]
+Base.iterate(l::NodeList) = l.mll.len == 0 ? nothing : (l.mll.node.next, l.mll.node.next.next)
+Base.iterate(l::NodeList, n::ListNode) = n === l.mll.node ? nothing : (n, n.next)
+collect_array(l::NodeList) = [node.data for node in l]
 
 
 function lifted_wcm_param(;
@@ -138,7 +142,7 @@ function calculate_fixedpoints(u_nullclines::Vector{Curve2{T}},
     ) where T
     # only need one variable's nullclines bc all FP must be on one of these nullclines
     subgrid_side_x = 1.2supergrid_dx
-    intersections = MutableLinkedList{SVector{2,T}}()
+    intersections = NodeList{SVector{2,T}}()
     prealloc_subgrid = Array{T,2}(undef, subgrid_side_n, subgrid_side_n)
     for u_line ∈ u_nullclines
         vertices = u_line.vertices
