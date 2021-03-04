@@ -22,6 +22,8 @@ using Statistics: std, mean
 using HypothesisTests: OneSampleTTest, confint
 include("util/sweep.jl")
 export sweep_calculate_fixedpoints
+include("util/metrics.jl")
+export epilepsy_metric
 
 include("space_reduction.jl")
 include("phase_space.jl")
