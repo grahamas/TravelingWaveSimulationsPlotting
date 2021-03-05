@@ -22,7 +22,7 @@ export PointVectorLine, Bootstrapped, Estimated
 using Statistics: std, mean
 using HypothesisTests: OneSampleTTest, confint
 include("util/sweep.jl")
-export sweep_calculate_fixedpoints
+export wcm_sweep_calculate_fixedpoints
 include("util/metrics.jl")
 export epilepsy_metric
 include("util/fixedpoints.jl")

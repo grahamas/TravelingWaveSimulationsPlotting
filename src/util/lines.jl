@@ -1,3 +1,5 @@
+# FIXME unused?
+
 l2(x,y) = sqrt(sum((x .- y) .^ 2))
 function diagonal_slice(x_axis, y_axis, data::Matrix, y_intercept, slope, dx=1)
     interp = LinearInterpolation((x_axis, y_axis), data')

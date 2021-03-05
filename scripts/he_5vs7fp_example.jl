@@ -14,7 +14,7 @@ if !@isdefined(refresh_sweep_arrs)
     refresh_sweep_arrs = false
 end
 
-if !@isdefined(blocking_fp_arr) || !@isdefined(monotonic_fp_arr) || refresh_sweep_arrs
+@time if !@isdefined(blocking_fp_arr) || !@isdefined(monotonic_fp_arr) || refresh_sweep_arrs
     A_range = 0.1:0.1:1.5
     sweeping_mods = (Aee=A_range, Aei=A_range, Aie=A_range, Aii=A_range)
     static_mods = (
@@ -27,12 +27,12 @@ if !@isdefined(blocking_fp_arr) || !@isdefined(monotonic_fp_arr) || refresh_swee
         prefix = "blocking_fp_arr",
         force = refresh_sweep_arrs
     ) do c
-        blocking_fp_arr = sweep_calculate_fixedpoints(
+        blocking_fp_arr = wcm_sweep_calculate_fixedpoints(
             "full_dynamics_blocking", 
             static_mods,
             sweeping_mods,
             ; 
-            dx = 0.01
+            axis_length=100
         )
         return @dict(blocking_fp_arr)
     end
@@ -41,12 +41,12 @@ if !@isdefined(blocking_fp_arr) || !@isdefined(monotonic_fp_arr) || refresh_swee
         prefix = "monotonic_fp_arr",
         force = refresh_sweep_arrs
     ) do c
-        monotonic_fp_arr = sweep_calculate_fixedpoints(
+        monotonic_fp_arr = wcm_sweep_calculate_fixedpoints(
             "full_dynamics_monotonic", 
             static_mods,
             sweeping_mods,
             ; 
-            dx = 0.01
+            axis_length=100
         )
         return @dict(monotonic_fp_arr)
     end
@@ -96,22 +96,22 @@ with_theme(simple_theme) do
         params = get_nullcline_params(sim)
 
         # test that the FP counter isn't unstable near this model
-        #test_resolutions = [0.01, 0.007, 0.003, 0.001]
-        test_resolutions = [0.007, 0.003]
-        test_fp_counts = length.(calculate_fixedpoints.(Ref(sim.model), test_resolutions))
-        a_test_is_different = !reduce(==, test_fp_counts)
+        test_axis_lengths = [50, 73, 100, 853]
+        test_fp_counts = length.(calculate_fixedpoints.(Ref(sim.model), test_axis_lengths))
+        @show test_fp_counts
+        a_test_is_different = !all(y->y==test_fp_counts[1], test_fp_counts)
         @show a_test_is_different
         
         if a_test_is_different || !isodd(test_fp_counts[begin]) 
-            @show calculate_fixedpoints.(Ref(sim.model), test_resolutions) .|> length
-            fig[1,1] = plot_nullclines!(fig, params, 0.01)
-            fig[2,1] = plot_nullclines!(fig, params, 0.007)
-            fig[1,2] = plot_nullclines!(fig, params, 0.003)
-            fig[2,2] = plot_nullclines!(fig, params, 0.001)
+            @show calculate_fixedpoints.(Ref(sim.model), test_axis_lengths) .|> length
+            fig[1,1] = plot_nullclines!(fig, params, test_axis_lengths[1+0])
+            fig[2,1] = plot_nullclines!(fig, params, test_axis_lengths[1+1])
+            fig[1,2] = plot_nullclines!(fig, params, test_axis_lengths[1+2])
+            fig[2,2] = plot_nullclines!(fig, params, test_axis_lengths[1+3])
             display(fig)
             error("assert failed.")
         end
-        fig[i_nonl_type, 1] = plot_nullclines!(fig, params, 0.007)
+        fig[i_nonl_type, 1] = plot_nullclines!(fig, params, test_axis_lengths[1])
         execs_by_stim_strength = [
             execute(prototype(; mods..., stim_strength=stim_strength)) 
             for stim_strength ∈ stim_strengths
