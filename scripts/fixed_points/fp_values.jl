@@ -9,50 +9,8 @@ using AxisIndices
 
 include(projectdir("_drafts/grouped_bar_plot.jl"))
 
-if !@isdefined(refresh_sweep_arrs)
-    refresh_sweep_arrs = false
-end
-
-if !@isdefined(blocking_fp_arr) || !@isdefined(monotonic_fp_arr) || refresh_sweep_arrs
-    A_range = 0.1:0.1:1.5
-    sweeping_mods = (Aee=A_range, Aei=A_range, Aie=A_range, Aii=A_range)
-    static_mods = (
-        α=(0.4, 0.7), 
-        firing_θI=0.2, blocking_θI=0.5, 
-        n_lattice = 2,
-        save_idxs=nothing, save_on=true, saveat=0.1
-    ) 
-    file, filename = produce_or_load(datadir(), []; 
-        prefix = "blocking_fp_arr",
-        force = refresh_sweep_arrs
-    ) do c
-        blocking_fp_arr = sweep_calculate_fixedpoints(
-            "full_dynamics_blocking", 
-            static_mods,
-            sweeping_mods,
-            ; 
-            dx = 0.01
-        )
-        return @dict(blocking_fp_arr)
-    end
-    @unpack blocking_fp_arr = file
-    file, filename = produce_or_load(datadir(), []; 
-        prefix = "monotonic_fp_arr",
-        force = refresh_sweep_arrs
-    ) do c
-        monotonic_fp_arr = sweep_calculate_fixedpoints(
-            "full_dynamics_monotonic", 
-            static_mods,
-            sweeping_mods,
-            ; 
-            dx = 0.01
-        )
-        return @dict(monotonic_fp_arr)
-    end
-    @unpack monotonic_fp_arr = file
-end
-
-refresh_sweep_arrs = false
+# loads blocking_fp_arr and monotonic_fp_arr
+include(scriptsdir("load/he_sweep_arrs.jl"))
 
 fig = let example_name = "seizures_fig",
     session_id = "$(Dates.now())",
@@ -102,11 +60,11 @@ with_theme(simple_theme) do
         # test that the FP counter isn't unstable near this model
         # @assert reduce(==, length.(calculate_fixedpoints.(Ref(params), [0.01, 0.001])))
         # make sure what's saved matches our mods
-        calculated_fp = calculate_fixedpoints(params, 0.01)
+        calculated_fp = calculate_fixedpoints(params, 100)
         saved_fp = getindex(fp_arr; A_mods...)
         # @assert calculated_fp == saved_fp
 
-        fig[i_nonl_type, 1] = plot_nullclines!(fig, params, 0.01; 
+        fig[i_nonl_type, 1] = plot_nullclines!(fig, params, 100; 
             mark_fp = true)
 
         collapsed_axes = (:Aie, :Aii)

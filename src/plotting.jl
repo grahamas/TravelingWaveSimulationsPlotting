@@ -34,11 +34,32 @@ function plot_and_save(plot_fn!, args...;
         session_name="unnnamedsession",
         plots_subdir=plotsdir("$(session_name)_$(session_id)"),
         plot_name = "$(strip(string(plot_fn!), '!'))_$(unique_id).png",
-        figure_resolution=(1600, 1600),
+        figure_resolution=(500, 500),
         kwargs...)
     figure = Figure(resolution=figure_resolution)
 
     figure[1,1] = plot_fn!(figure, args...; kwargs...)
+
+    _save!(figure, plot_name; unique_id=unique_id, session_id=session_id, session_name=session_name, plots_subdir=plots_subdir)
+
+    return figure
+end
+
+export plot_and_save_ax
+function plot_and_save_ax(plot_fn!, args...; 
+        unique_id="$(Dates.now())",
+        session_id=unique_id,
+        session_name="unnnamedsession",
+        plots_subdir=plotsdir("$(session_name)_$(session_id)"),
+        plot_name = "$(strip(string(plot_fn!), '!'))_$(unique_id).png",
+        figure_resolution=(500, 500),
+        title = "",
+        kwargs...
+    )
+    figure = Figure(resolution=figure_resolution)
+    figure[1,1] = ax = AbstractPlotting.Axis(figure, title=title)
+
+    plot_fn!(ax, args...; kwargs...)
 
     _save!(figure, plot_name; unique_id=unique_id, session_id=session_id, session_name=session_name, plots_subdir=plots_subdir)
 

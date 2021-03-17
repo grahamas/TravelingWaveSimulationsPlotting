@@ -17,7 +17,7 @@ function plot_nullclines!(fig::Figure, p::Union{AbstractWCMDepNullclineParams, A
     plot_nullclines!(fig, p, [range(0., 1., length=axis_length), range(0., 1., length=axis_length)]; kwargs...)
 end
 function plot_nullclines!(fig::Figure, p::Union{AbstractWCMDepNullclineParams, AbstractWCMNullclineParams}, nullcline_axes::AbstractVector{<:AbstractVector};
-        xlabel="u", ylabel="v", mark_fp=true)
+        xlabel="u", ylabel="v", mark_fp=true, linewidth=1)
     ax = MakieLayout.Axis(fig, aspect=DataAspect(),
         xlabel=xlabel, ylabel=ylabel
     )
@@ -29,12 +29,12 @@ function plot_nullclines!(fig::Figure, p::Union{AbstractWCMDepNullclineParams, A
 
     for line in u_nullclines
         xs, ys = coordinates(line)
-        Makie.lines!(ax, xs, ys, color=:blue)
+        Makie.lines!(ax, xs, ys, color=:blue, linewidth=linewidth)
     end
 
     for line in v_nullclines
         xs, ys = coordinates(line)
-        Makie.lines!(ax, xs, ys, color=:red, linestyle=:dash, linesize=5)
+        Makie.lines!(ax, xs, ys, color=:red, linestyle=:dash, linewidth=linewidth)
     end
 
     if mark_fp
