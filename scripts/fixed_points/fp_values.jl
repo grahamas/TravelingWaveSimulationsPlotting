@@ -60,11 +60,11 @@ with_theme(simple_theme) do
         # test that the FP counter isn't unstable near this model
         # @assert reduce(==, length.(calculate_fixedpoints.(Ref(params), [0.01, 0.001])))
         # make sure what's saved matches our mods
-        calculated_fp = calculate_fixedpoints(params, 0.01)
+        calculated_fp = calculate_fixedpoints(params, 100)
         saved_fp = getindex(fp_arr; A_mods...)
         # @assert calculated_fp == saved_fp
 
-        fig[i_nonl_type, 1] = plot_nullclines!(fig, params, 0.01; 
+        fig[i_nonl_type, 1] = plot_nullclines!(fig, params, 100; 
             mark_fp = true)
 
         collapsed_axes = (:Aie, :Aii)
