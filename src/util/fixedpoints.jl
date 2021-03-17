@@ -39,6 +39,7 @@ function calculate_fixedpoints!(
         dist_atol=1e-6, zero_atol=sqrt(eps()),
         kwargs...
     )
+    # FIXME? this allocates :(
     nullclines = calculate_nullclines!(
         field_arr, field_axes, field_fns,
         nullcline_params

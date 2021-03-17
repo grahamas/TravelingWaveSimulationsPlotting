@@ -16,6 +16,7 @@ end
     ) 
     file, filename = produce_or_load(datadir(), []; 
         prefix = "blocking_fp_arr",
+        suffix = "bson",
         force = refresh_sweep_arrs
     ) do c
         blocking_fp_arr = wcm_sweep_calculate_fixedpoints(
@@ -30,6 +31,7 @@ end
     @unpack blocking_fp_arr = file
     file, filename = produce_or_load(datadir(), []; 
         prefix = "monotonic_fp_arr",
+        suffix = "bson",
         force = refresh_sweep_arrs
     ) do c
         monotonic_fp_arr = wcm_sweep_calculate_fixedpoints(
