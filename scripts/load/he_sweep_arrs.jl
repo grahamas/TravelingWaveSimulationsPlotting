@@ -20,32 +20,34 @@ end
         force = refresh_sweep_arrs
     ) do c
         blocking_nullcline_static_mods = nullcline_static_mods
+        blocking_prototype_name = "full_dynamics_blocking"
         blocking_fp_arr = wcm_sweep_calculate_fixedpoints(
-            "full_dynamics_blocking", 
+            blocking_prototype_name, 
             blocking_nullcline_static_mods,
             nullcline_sweeping_mods,
             ; 
             axis_length=100
         )
-        return @dict(blocking_fp_arr, blocking_nullcline_static_mods)
+        return @dict(blocking_fp_arr, blocking_nullcline_static_mods, blocking_prototype_name)
     end
-    @unpack blocking_fp_arr, blocking_nullcline_static_mods = file
+    @unpack blocking_fp_arr, blocking_nullcline_static_mods, blocking_prototype_name = file
     file, filename = produce_or_load(datadir(), []; 
         prefix = "monotonic_fp_arr",
         suffix = "bson",
         force = refresh_sweep_arrs
     ) do c
         monotonic_nullcline_static_mods = nullcline_static_mods
+        monotonic_prototype_name = "full_dynamics_monotonic"
         monotonic_fp_arr = wcm_sweep_calculate_fixedpoints(
-            "full_dynamics_monotonic", 
+            monotonic_prototype_name, 
             monotonic_nullcline_static_mods,
             nullcline_sweeping_mods,
             ; 
             axis_length=100
         )
-        return @dict(monotonic_fp_arr, monotonic_nullcline_static_mods)
+        return @dict(monotonic_fp_arr, monotonic_nullcline_static_mods, monotonic_prototype_name)
     end
-    @unpack monotonic_fp_arr, monotonic_nullcline_static_mods = file
+    @unpack monotonic_fp_arr, monotonic_nullcline_static_mods, monotonic_prototype_name = file
 end
 
 refresh_sweep_arrs = false

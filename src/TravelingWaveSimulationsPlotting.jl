@@ -12,6 +12,8 @@ using StaticArrays
 using Contour: contour, lines, coordinates, Curve2
 using IterTools: product
 using LoopVectorization
+using LinearAlgebra
+using ForwardDiff
 
 include("util/axisarray.jl")
 include("util/lines.jl")

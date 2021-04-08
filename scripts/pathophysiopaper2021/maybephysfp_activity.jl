@@ -46,11 +46,39 @@ for (sym, fp_arr) ∈ [(:monotonic, monotonic_fp_arr), (:blocking, blocking_fp_a
             all_fp_Es[mx_idx..., fp_idx] = first(fps[fp_idx])
         end
     end
+    @show "$sym all: $(count(.!ismissing.(all_fp_Es)))"
     plot_and_save_ax(hist!,
         skipmissing(all_fp_Es) |> collect,
         figure_resolution=figure_resolution,
         plot_name="allfp_$(sym)_excitatory_activity_hist.png",
         title="Histogram of excitatory activity of all FP ($(sym))",
+        plots_subdir=plots_subdir
+    )
+end
+
+has_found = false
+for (sym, fp_arr, smods, prototype_name) ∈ [(:monotonic, monotonic_fp_arr, monotonic_nullcline_static_mods, monotonic_prototype_name), (:blocking, blocking_fp_arr, blocking_nullcline_static_mods, blocking_prototype_name)]
+    prototype = get_prototype(prototype_name)
+    stable_fp_Es = Array{Union{Float64,Missing}}(missing, size(fp_arr)..., 7)
+    for (mx_idx, (nt, fps)) ∈ zip(CartesianIndices(fp_arr), TravelingWaveSimulationsPlotting.enumerate_nt(fp_arr))
+        params = get_nullcline_params(prototype(; smods..., nt...))
+        for fp_idx ∈ 1:length(fps)
+            fp = fps[fp_idx]
+            if TravelingWaveSimulationsPlotting.fixedpoint_is_stable(params, fp)
+                stable_fp_Es[mx_idx, fp_idx] = first(fp)
+                if !has_found && first(fp) > 0.714
+                    @show sym nt
+                    has_found = true
+                end
+            end
+        end
+    end
+    @show "$sym stable: $(count(.!ismissing.(stable_fp_Es)))"
+    plot_and_save_ax(hist!,
+        skipmissing(stable_fp_Es) |> collect,
+        figure_resolution=figure_resolution,
+        plot_name="stablefp_$(sym)_excitatory_activity_hist.png",
+        title="Histogram of excitatory activity of stable FP ($(sym))",
         plots_subdir=plots_subdir
     )
 end

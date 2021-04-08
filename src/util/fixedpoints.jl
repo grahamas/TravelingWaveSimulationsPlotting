@@ -15,7 +15,7 @@ function derive_jacobian_fn(
     nullcline_params::Union{AbstractWCMNullclineParams,AbstractWCMDepNullclineParams}
 )
     wcm_du_dv =  derive_vector_fn(nullcline_params)
-    uv -> jacobian!(wcm_du_dv, uv)
+    uv -> ForwardDiff.jacobian(wcm_du_dv, uv)
 end
 
 function derive_vector_fn!(
@@ -33,6 +33,12 @@ function derive_jacobian_fn!(
 )
     wcm_du_dv! =  derive_vector_fn!(nullcline_params)
     (result, dudv, uv) -> jacobian!(result, wcm_du_dv!, dudv, uv)
+end
+
+function fixedpoint_is_stable(nullcline_params, fp)
+    jac_fn = derive_jacobian_fn(nullcline_params)
+    jac = jac_fn(fp)
+    all(real.(eigvals(jac)) .< 0)
 end
 
 function calculate_fixedpoints(
