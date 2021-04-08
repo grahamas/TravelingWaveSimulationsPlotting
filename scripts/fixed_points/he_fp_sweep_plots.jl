@@ -59,7 +59,7 @@ for (nonl_type, fp_arr) in fp_arrs
             plot_and_save(axisarray_heatmap!, smushed_count_arr; 
                 figure_resolution=figure_resolution,
                 colorbar_width = colorbar_width,
-                plot_name="fpcountequals$(fp_count)_$(nonl_type)_$(join(visible_axes, "_")).png", title="#FP = $(fp_count)",
+                plot_name="fpcountequals$(fp_count)_$(nonl_type)_$(join(visible_axes, "_")).png", title="$(nonl_type) models with #FP = $(fp_count)",
                 plots_subdir=plots_subdir)
         end
     end

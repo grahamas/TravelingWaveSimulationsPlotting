@@ -10,12 +10,11 @@ using AxisIndices
 # loads blocking_fp_arr and monotonic_fp_arr
 include(scriptsdir("load/he_sweep_arrs.jl"))
 
-
 let blocking_fp_arr = blocking_fp_arr, 
     monotonic_fp_arr = monotonic_fp_arr,
     blocking_fp_count_arr = length.(blocking_fp_arr), 
     monotonic_fp_count_arr = length.(monotonic_fp_arr),
-    session_name = "updown_vs_epileptic",
+    session_name = "mono5fp_vs_db7fp",
     session_id = "$(Dates.now())",
     colorbar_width = 15,
     figure_resolution=(700,700)

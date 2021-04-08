@@ -68,6 +68,8 @@ function _auto_range(nonl_param::AbstractNonlinearityParameter, potential_range=
 end
     
 function _auto_range(nonl_params::AbstractArray{<:AbstractNonlinearityParameter}, potential_range=_potential_range(nonl_params))
+    @show potential_range
+    @show nonl_params
     dummy_space = CompactLattice(first(potential_range), last(potential_range), length(potential_range))
     nonls = map(np -> np(dummy_space), nonl_params)
     max_outputs = [nonl(collect(potential_range), nothing, nothing) for nonl in nonls]

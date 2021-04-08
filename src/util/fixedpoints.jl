@@ -1,6 +1,40 @@
 calculate_fixedpoints(model::Union{AbstractModel,AbstractSimulation}, args...; kwargs...) = calculate_fixedpoints(get_nullcline_params(model), args...; kwargs...)
 calculate_fixedpoints!(du_arr::AbstractArray{T,N}, field_axes, model::Union{AbstractModel{T},AbstractSimulation{T}}, args...; kwargs...) where {N,T} = calculate_fixedpoints!(du_arr, field_axes, get_nullcline_params(model), args...; kwargs...)
 
+function derive_vector_fn(
+    nullcline_params::Union{AbstractWCMNullclineParams,AbstractWCMDepNullclineParams}
+)
+    function wcm_du_dv(uv)
+        u = uv[1]; v = uv[2]
+        [wcm_du_defn(u, v, nullcline_params)
+         wcm_dv_defn(u, v, nullcline_params)]
+    end
+end
+
+function derive_jacobian_fn(
+    nullcline_params::Union{AbstractWCMNullclineParams,AbstractWCMDepNullclineParams}
+)
+    wcm_du_dv =  derive_vector_fn(nullcline_params)
+    uv -> jacobian!(wcm_du_dv, uv)
+end
+
+function derive_vector_fn!(
+    nullcline_params::Union{AbstractWCMNullclineParams,AbstractWCMDepNullclineParams}
+)
+    function wcm_du_dv!(dudv, uv)
+        u = uv[1]; v = uv[2]
+        dudv[1] = wcm_du_defn(u, v, nullcline_params)
+        dudv[2] = wcm_dv_defn(u, v, nullcline_params)
+    end
+end
+
+function derive_jacobian_fn!(
+    nullcline_params::Union{AbstractWCMNullclineParams,AbstractWCMDepNullclineParams}
+)
+    wcm_du_dv! =  derive_vector_fn!(nullcline_params)
+    (result, dudv, uv) -> jacobian!(result, wcm_du_dv!, dudv, uv)
+end
+
 function calculate_fixedpoints(
         nullcline_params::Union{AbstractWCMNullclineParams,AbstractWCMDepNullclineParams}, 
         axis_length::Integer=100
