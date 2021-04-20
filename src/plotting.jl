@@ -53,11 +53,11 @@ function plot_and_save_ax(plot_fn!, args...;
         plots_subdir=plotsdir("$(session_name)_$(session_id)"),
         plot_name = "$(strip(string(plot_fn!), '!'))_$(unique_id).png",
         figure_resolution=(500, 500),
-        title = "",
+        Axis = (;),
         kwargs...
     )
     figure = Figure(resolution=figure_resolution)
-    figure[1,1] = ax = AbstractPlotting.Axis(figure, title=title)
+    figure[1,1] = ax = AbstractPlotting.Axis(figure; Axis...)
 
     plot_fn!(ax, args...; kwargs...)
 

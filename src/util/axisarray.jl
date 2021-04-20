@@ -59,3 +59,15 @@ function Base.iterate(enaa::EnumerateNAA)
     nt = nt_coord(enaa.naa, tup)
     return ((nt, val), state)
 end
+
+function get_coordinate(naa::NamedAxisArray, cidx::CartesianIndex)
+    get_coordinate(naa, Tuple(cidx))
+end
+function get_coordinate(naa::NamedAxisArray{NAMES}, tup::Tuple) where NAMES
+    dim_coords = axes_keys(naa)
+    NamedTuple{NAMES}(Tuple(dim[idx] for (dim, idx) ∈ zip(dim_coords, tup)))
+end
+function get_coordinate(naa::NamedAxisArray{NAMES}, idx::Int) where NAMES
+    dim_coords = Iterators.product(axes_keys(naa)...) |> collect
+    NamedTuple{NAMES}(dim_coords[idx])
+end

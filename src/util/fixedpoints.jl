@@ -36,9 +36,20 @@ function derive_jacobian_fn!(
 end
 
 function fixedpoint_is_stable(nullcline_params, fp)
+    @assert all(abs.(derive_vector_fn(nullcline_params)(fp)) .< sqrt(eps())) derive_vector_fn(nullcline_params)(fp)
     jac_fn = derive_jacobian_fn(nullcline_params)
     jac = jac_fn(fp)
     all(real.(eigvals(jac)) .< 0)
+end
+
+function fixedpoint_stability(nullcline_params, fp)
+    jac_fn = derive_jacobian_fn(nullcline_params)
+    jac = jac_fn(fp)
+    if all(real.(eigvals(jac)) .< 0)
+        return 2
+    else
+        return 1
+    end
 end
 
 function calculate_fixedpoints(

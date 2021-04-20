@@ -17,7 +17,9 @@ function plot_nullclines!(fig::Figure, p::Union{AbstractWCMDepNullclineParams, A
     plot_nullclines!(fig, p, [range(0., 1., length=axis_length), range(0., 1., length=axis_length)]; kwargs...)
 end
 function plot_nullclines!(fig::Figure, p::Union{AbstractWCMDepNullclineParams, AbstractWCMNullclineParams}, nullcline_axes::AbstractVector{<:AbstractVector};
-        xlabel="u", ylabel="v", mark_fp=true, linewidth=1)
+        xlabel="E", ylabel="I", 
+        mark_fp=true, arrows_step=nothing,
+        linewidth=1)
     ax = MakieLayout.Axis(fig, aspect=DataAspect(),
         xlabel=xlabel, ylabel=ylabel
     )
@@ -39,8 +41,21 @@ function plot_nullclines!(fig::Figure, p::Union{AbstractWCMDepNullclineParams, A
 
     if mark_fp
         fixedpoints = calculate_fixedpoints(p, length(nullcline_axes[1]))
-        scatter!(ax, Point2f0.(fixedpoints))
+        stability = fixedpoint_stability.(Ref(p), fixedpoints)
+        stability_marker = getindex.(Ref([:xcross, :circle]), stability)
+        scatter!(ax, Point2f0.(fixedpoints), marker=stability_marker, markersize=15)
     end
+
+    if arrows_step !== nothing
+        arrow_axis = 0.:arrows_step:1. |> collect
+        arrow_axes = [arrow_axis, arrow_axis]
+        dus = calculate_field(wcm_du_defn, arrow_axes, p)
+        dvs = calculate_field(wcm_dv_defn, arrow_axes, p)
+        arrows!(ax, arrow_axis, arrow_axis, dus, dvs; arrowsize = 0.03, normalize=true, lengthscale=0.02f0)
+    end
+
+    xlims!(ax, 0., 1.)
+    ylims!(ax, 0., 1.)
 
     return ax
 end

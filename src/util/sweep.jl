@@ -7,7 +7,7 @@ using Dates
 using Makie
 using AxisIndices, IterTools
 
-function wcm_sweep_calculate_fixedpoints(prototype_name::String, static_mods, dynamic_mods::NamedTuple{NAMES}; axis_length::Integer=100) where {NAMES}
+function wcm_sweep_calculate_fixedpoints(prototype_name::String, static_mods, dynamic_mods::NamedTuple{NAMES}; axis_length::Integer=150) where {NAMES}
     if :n_lattice ∉ NAMES
         # @warn "Don't forget to make n_lattice small!"
     end
@@ -22,6 +22,7 @@ function wcm_sweep_calculate_fixedpoints(prototype_name::String, static_mods, dy
         sweeping_mods = NamedTuple{NAMES}(sweeping_vals...)
         sim = prototype(; static_mods..., sweeping_mods...)
         params = get_nullcline_params(sim.model)
-        calculate_fixedpoints!(dus, [us, vs], (wcm_du_defn, wcm_dv_defn), params, ((0.,1.), (0.,1.)))
+        fps = calculate_fixedpoints!(dus, [us, vs], (wcm_du_defn, wcm_dv_defn), params, ((0.,1.), (0.,1.)))
+        @assert length(fps) <= 7
     end, sweep_axes)
 end
