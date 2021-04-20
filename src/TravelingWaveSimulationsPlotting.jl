@@ -29,6 +29,7 @@ export epilepsy_metric
 include("util/fixedpoints.jl")
 export calculate_fixedpoints,
     calculate_fixedpoints!
+include("util/fixedpoint_stability.jl")
 
 include("space_reduction.jl")
 include("phase_space.jl")
