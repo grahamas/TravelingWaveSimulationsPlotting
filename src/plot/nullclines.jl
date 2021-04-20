@@ -13,6 +13,8 @@ function lifted_wcm_param(;
         )
 end
 
+using OffsetArrays
+
 function plot_nullclines!(fig::Figure, p::Union{AbstractWCMDepNullclineParams, AbstractWCMNullclineParams}, axis_length::Integer=100; kwargs...)
     plot_nullclines!(fig, p, [range(0., 1., length=axis_length), range(0., 1., length=axis_length)]; kwargs...)
 end
@@ -42,7 +44,8 @@ function plot_nullclines!(fig::Figure, p::Union{AbstractWCMDepNullclineParams, A
     if mark_fp
         fixedpoints = calculate_fixedpoints(p, length(nullcline_axes[1]))
         stability = fixedpoint_stability.(Ref(p), fixedpoints)
-        stability_marker = getindex.(Ref([:xcross, :circle]), stability)
+        possible_stability_markers = OffsetArray([:xcross, :star, :circle], -1:1)
+        stability_marker = getindex.(Ref(possible_stability_markers), stability)
         scatter!(ax, Point2f0.(fixedpoints), marker=stability_marker, markersize=15)
     end
 

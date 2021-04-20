@@ -13,28 +13,6 @@ sub_A_sweep_upper_bound = 1.5
 sub_A_range = sub_A_sweep_lower_bound..sub_A_sweep_upper_bound
 include(scriptsdir("load/he_sweep_arrs.jl"))
 
-function count_stable_fp(prototype_name::String, fixed_nt::NamedTuple, fp_arr::NamedAxisArray)
-    prototype = get_prototype(prototype_name)
-    map(TravelingWaveSimulationsPlotting.enumerate_nt(fp_arr)) do (nt, fps)
-        params = get_nullcline_params(prototype(; fixed_nt..., nt...))
-        count(TravelingWaveSimulationsPlotting.fixedpoint_is_stable.(Ref(params), fps))
-    end
-end
-function count_stable_fps(params::AbstractNullclineParams, fps::AbstractVector)
-    count(TravelingWaveSimulationsPlotting.fixedpoint_is_stable.(Ref(params), fps))
-end
-
-function filter_stable_fps(prototype_name::String, fixed_nt::NamedTuple, fp_arr::NamedAxisArray{NAMES}) where NAMES
-    prototype = get_prototype(prototype_name)
-    filtered_fp_arr_vec = map(TravelingWaveSimulationsPlotting.enumerate_nt(fp_arr)) do (nt, fps)
-        params = get_nullcline_params(prototype(; fixed_nt..., nt...))
-        filter_stable_fps(params, fps)
-    end
-    NamedAxisArray{NAMES}(reshape(filtered_fp_arr_vec, size(fp_arr)), axes_keys(fp_arr))
-end
-function filter_stable_fps(params::AbstractNullclineParams, fps::AbstractVector)
-    filter(fp -> TravelingWaveSimulationsPlotting.fixedpoint_is_stable(params, fp), fps)
-end
 
 
 let blocking_fp_arr = blocking_fp_arr[Aee=sub_A_range,Aei=sub_A_range,Aie=sub_A_range,Aii=sub_A_range], 
@@ -72,8 +50,8 @@ blocking_stable_fp_arr = filter_stable_fps(blocking_prototype_name, smods, block
 monotonic_stable_fp_arr = filter_stable_fps(monotonic_prototype_name, smods, monotonic_fp_arr)
 
 
-n_sfp_blocking = count_stable_fp(blocking_prototype_name, smods, blocking_fp_arr)
-n_sfp_monotonic = count_stable_fp(monotonic_prototype_name, smods, monotonic_fp_arr)
+n_sfp_blocking = count_stable_fps(blocking_prototype_name, smods, blocking_fp_arr)
+n_sfp_monotonic = count_stable_fps(monotonic_prototype_name, smods, monotonic_fp_arr)
 
 @show count(n_sfp_blocking .== 4)
 @show count(n_sfp_monotonic .== 3)
