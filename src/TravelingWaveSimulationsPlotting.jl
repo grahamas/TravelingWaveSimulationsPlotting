@@ -14,6 +14,7 @@ using IterTools: product
 using LoopVectorization
 using LinearAlgebra
 using ForwardDiff
+using OffsetArrays
 
 include("util/axisarray.jl")
 include("util/lines.jl")

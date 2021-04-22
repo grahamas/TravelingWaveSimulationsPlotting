@@ -24,6 +24,8 @@ function fixedpoint_is_oscillatory(nullcline_params::AbstractNullclineParams, fp
     jacobian_is_oscillatory(jac)
 end
 
+const STABILITY_MARKERS = OffsetArray([:circle, :star, :xcross], -1:1)
+export STABILITY_MARKERS
 function fixedpoint_stability(nullcline_params, fp)
     jac_fn = derive_jacobian_fn(nullcline_params)
     jac = jac_fn(fp)
