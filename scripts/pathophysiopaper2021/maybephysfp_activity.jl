@@ -21,15 +21,15 @@ let blocking_fp_arr = blocking_fp_arr[Aee=sub_A_range,Aei=sub_A_range,Aie=sub_A_
     monotonic_fp_count_arr = length.(monotonic_fp_arr),
     blocking_prototype_name = "full_dynamics_blocking",
     monotonic_prototype_name = "full_dynamics_monotonic",
-    session_name = "fp_activity_$sub_A_range",
-    session_id = "$(Dates.now())",
-    figure_resolution=(800,800),
     smods = (
         α=(0.4, 0.7), 
         firing_θI=0.2, blocking_θI=0.5, 
         n_lattice = 2,
         save_idxs=nothing, save_on=false, saveat=0.1
     ),
+    session_name = "fp_activity_$sub_A_range",
+    session_id = "$(Dates.now())",
+    figure_resolution=(800,800),
     simple_theme = Theme(
         linewidth = 20.0,
         fontsize=24,
