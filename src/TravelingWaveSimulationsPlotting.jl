@@ -35,7 +35,7 @@ using HypothesisTests: OneSampleTTest, confint
 include("util/sweep.jl")
 export wcm_sweep_calculate_fixedpoints
 include("util/metrics.jl")
-export epilepsy_metric
+export seizure_index
 include("util/fixedpoints.jl")
 export calculate_fixedpoints,
     calculate_fixedpoints!

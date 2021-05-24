@@ -39,7 +39,7 @@ simple_theme = Theme(
 with_theme(simple_theme) do
 for (nonl_type, fp_arr) in fp_arrs
     fp_count_arr = length.(fp_arr)
-    fp_epilepsy_arr = epilepsy_metric.(fp_arr)
+    fp_epilepsy_arr = seizure_index.(fp_arr)
     for visible_axes in possible_visible_axes
         smushed_count_arr = _collapse_to_axes(fp_count_arr, visible_axes...)
         plot_and_save(axisarray_heatmap!, smushed_count_arr;  

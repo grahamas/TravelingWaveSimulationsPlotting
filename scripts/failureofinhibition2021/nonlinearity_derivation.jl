@@ -1,7 +1,9 @@
-#using GLMakie; ext_2d = "png"; GLMakie.activate!()
-using CairoMakie; ext_2d = "svg"; CairoMakie.activate!(); 
+using GLMakie; ext_2d = "png"; GLMakie.activate!()
+#using CairoMakie; ext_2d = "svg"; CairoMakie.activate!(); 
+using DrWatson, Dates
 
-let N = 1000,
+let figure_name = "nonlinearity_derivation",
+    N = 1000,
     simple_theme = Theme(
         linewidth = 3.0,
         fontsize=18,
@@ -16,6 +18,8 @@ let N = 1000,
         )
     ) ;
 
+_subplotsdir = plotsdir("$(figure_name)_$(ext_2d)_$(now())")
+subplotsdir(x="") = joinpath(_subplotsdir, x)
 
 with_theme(simple_theme) do
 θ_firing = randn(N) .* 0.01 .+ 0.1
@@ -32,11 +36,13 @@ example_monotonic_nonl = is_firing.(example_firing_threshold .<= xs)
 example_failing_nonl = is_firing.(example_firing_threshold .<= xs .<= example_failing_threshold)
 
 fig = Figure()
-fig[1,1] = ax_firing_example = Axis(fig, ylabel="firing?")
+fig[1,1] = ax_firing_example = Axis(fig, ylabel="firing?",
+    yticks=[0,1])
 lines!(ax_firing_example, xs, example_monotonic_nonl)
 
 firing_accum = zeros(size(xs))
-fig[2,1] = ax_firing_many = Axis(fig, ylabel="firing?")
+fig[2,1] = ax_firing_many = Axis(fig, ylabel="firing?",
+    yticks=[0,1])
 for θ ∈ θ_firing
     this_firing = is_firing.(θ .<= xs)
     lines!(ax_firing_many, xs, this_firing)
@@ -74,6 +80,9 @@ hidexdecorations!.([ax_firing_many, ax_firing_example])
 
 fig[0,1] = Label(fig, "monotonic", tellwidth=false)
 fig[1,2] = Label(fig, "failing", tellwidth=false)
+
+mkpath(subplotsdir())
+save(subplotsdir("$(figure_name).$(ext_2d)"), fig)
 
 fig
 

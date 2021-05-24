@@ -71,24 +71,24 @@ with_theme(simple_theme) do
         plots_subdir=plots_subdir
     )
 
-    monotonic_epilepsy_metric_arr = epilepsy_metric.(monotonic_fp_arr)
-    blocking_epilepsy_metric_arr = epilepsy_metric.(blocking_fp_arr)
+    monotonic_seizure_index_arr = seizure_index.(monotonic_fp_arr)
+    blocking_seizure_index_arr = seizure_index.(blocking_fp_arr)
 
     plot_and_save_ax(hist!,
-        monotonic_epilepsy_metric_arr[mono_5fp];
+        monotonic_seizure_index_arr[mono_5fp];
         figure_resolution=figure_resolution,
         colorbar_width=colorbar_width,
-        plot_name="mono5fp_epilepsy_metric_hist.$(ext_2d)",
-        title="Histogram of epilepsy metric for mono-5FP",
+        plot_name="mono5fp_seizure_index_hist.$(ext_2d)",
+        title="Histogram of seizure index for mono-5FP",
         plots_subdir=plots_subdir
     )
 
     plot_and_save_ax(hist!,
-        blocking_epilepsy_metric_arr[block_7fp];
+        blocking_seizure_index_arr[block_7fp];
         figure_resolution=figure_resolution,
         colorbar_width=colorbar_width,
-        plot_name="block7fp_epilepsy_metric_hist.$(ext_2d)",
-        title="Histogram of epilepsy metric for block-7FP",
+        plot_name="block7fp_seizure_index_hist.$(ext_2d)",
+        title="Histogram of seizure index for block-7FP",
         plots_subdir=plots_subdir
     )
 

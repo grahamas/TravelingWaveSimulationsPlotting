@@ -53,12 +53,15 @@ function plot_and_save_ax(plot_fn!, args...;
         plot_name = "$(strip(string(plot_fn!), '!'))_$(unique_id).png",
         figure_resolution=(500, 500),
         Axis = (;),
+        tightlimits=true,
         kwargs...
     )
     figure = Figure(resolution=figure_resolution)
     figure[1,1] = ax = Makie.Axis(figure; Axis...)
 
     plot_fn!(ax, args...; kwargs...)
+
+    tightlimits && tightlimits!(ax)
 
     _save!(figure, plot_name; unique_id=unique_id, session_id=session_id, session_name=session_name, plots_subdir=plots_subdir)
 

@@ -18,7 +18,6 @@ end
 function plot_nullclines!(fig::Figure, p::Union{AbstractWCMDepNullclineParams, AbstractWCMNullclineParams}, nullcline_axes::AbstractVector{<:AbstractVector};
         xlabel="E", ylabel="I", 
         title="",
-        linewidth=2,
         mark_fp=true, arrows_step=nothing
         )
     ax = MakieLayout.Axis(fig, aspect=DataAspect(),
@@ -38,13 +37,13 @@ function plot_nullclines!(fig::Figure, p::Union{AbstractWCMDepNullclineParams, A
         arrow_axes = [arrow_axis, arrow_axis]
         dus = calculate_field(wcm_du_defn, arrow_axes, p)
         dvs = calculate_field(wcm_dv_defn, arrow_axes, p)
-        arrows!(ax, arrow_axis, arrow_axis, dus, dvs; arrowsize = 0.025, normalize=true, lengthscale=0.02f0, arrowcolor=:grey, linecolor=:grey)
+        strength = vec(sqrt.(dus .^ 2 .+ dvs .^ 2))
+        arrows!(ax, arrow_axis, arrow_axis, dus, dvs; arrowcolor=strength, linecolor=strength)
     end
 
     for line in u_nullclines
         xs, ys = coordinates(line)
         Makie.lines!(ax, xs, ys; 
-            linewidth=linewidth,
             color=:blue
         )
     end
@@ -52,7 +51,6 @@ function plot_nullclines!(fig::Figure, p::Union{AbstractWCMDepNullclineParams, A
     for line in v_nullclines
         xs, ys = coordinates(line)
         Makie.lines!(ax, xs, ys, color=:red, 
-            linewidth=linewidth,
             linestyle=:dash
         )
     end
@@ -61,7 +59,7 @@ function plot_nullclines!(fig::Figure, p::Union{AbstractWCMDepNullclineParams, A
         fixedpoints = calculate_fixedpoints(p, length(nullcline_axes[1]))
         stability = fixedpoint_stability.(Ref(p), fixedpoints)
         stability_marker = getindex.(Ref(STABILITY_MARKERS), stability)
-        scatter!(ax, Point2f0.(fixedpoints), marker=stability_marker, markersize=15, color=:darkgrey)
+        scatter!(ax, Point2f0.(fixedpoints), marker=stability_marker,color=:darkgrey)
     end
 
     xlims!(ax, 0., 1.)

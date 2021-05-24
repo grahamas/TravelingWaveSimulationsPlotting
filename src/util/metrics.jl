@@ -1,5 +1,5 @@
 
-function epilepsy_metric(point::PT) where {PT<:AbstractVector}
+function seizure_index(point::PT) where {PT<:AbstractVector}
     @assert all(1. .>= point .>= 0.)
     if sum(point) == 0.
         return 0.
@@ -8,9 +8,9 @@ function epilepsy_metric(point::PT) where {PT<:AbstractVector}
     end
 end
 
-function epilepsy_metric(critical_points::AV) where {PT<:AbstractVector, AV<:AbstractVector{<:PT}}
+function seizure_index(critical_points::AV) where {PT<:AbstractVector, AV<:AbstractVector{<:PT}}
     isempty(critical_points) && return 0
-    maximum(epilepsy_metric.(critical_points))
+    maximum(seizure_index.(critical_points))
 end
 
 function contrast_metric(point::PT) where {PT<:AbstractVector}
