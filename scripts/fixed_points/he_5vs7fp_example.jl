@@ -89,7 +89,7 @@ with_theme(simple_theme) do
         monotonic_fp_count_hist = [log10(count(monotonic_fp_count_arr .== x)) for x in n_fps]
         max_log = vcat(blocking_fp_count_hist, monotonic_fp_count_hist) |> maximum |> mx -> ceil(Int, mx)
 
-        ax = AbstractPlotting.Axis(fig)
+        ax = Makie.Axis(fig)
         gbp = groupedbarplot!(ax, n_fps, [monotonic_fp_count_hist, blocking_fp_count_hist])
         gbp_labels = ["mono", "block"]
         tightlimits!(ax)

@@ -4,7 +4,8 @@ using TravelingWaveSimulations, WilsonCowanModel,
     Simulation73Plotting, Simulation73
 using TravelingWaveSimulationsPlotting: _collapse_to_axes
 using Dates
-using Makie
+#using GLMakie; ext_2d = "png"; GLMakie.activate!()
+using CairoMakie; ext_2d = "svg"; CairoMakie.activate!()
 using AxisIndices
 
 # loads blocking_fp_arr and monotonic_fp_arr
@@ -54,7 +55,7 @@ with_theme(simple_theme) do
             _collapse_to_axes(shouldbezeros_not_5_but_7, :Aee, :Aei);
             figure_resolution=figure_resolution,
             colorbar_width=colorbar_width,
-            plot_name="SANITY_CHECK.png",
+            plot_name="SANITY_CHECK.$(ext_2d)",
             title="Blocking-7FP that do NOT come from mono-5FP",
             plots_subdir=plots_subdir
         )
@@ -65,7 +66,7 @@ with_theme(simple_theme) do
         _collapse_to_axes(both_5_and_7, :Aee, :Aei);
         figure_resolution=figure_resolution,
         colorbar_width=colorbar_width,
-        plot_name="mono5fp_block7fp_overlap.png",
+        plot_name="mono5fp_block7fp_overlap.$(ext_2d)",
         title="Overlap between mono-5FP and blocking-7FP",
         plots_subdir=plots_subdir
     )
@@ -77,7 +78,7 @@ with_theme(simple_theme) do
         monotonic_epilepsy_metric_arr[mono_5fp];
         figure_resolution=figure_resolution,
         colorbar_width=colorbar_width,
-        plot_name="mono5fp_epilepsy_metric_hist.png",
+        plot_name="mono5fp_epilepsy_metric_hist.$(ext_2d)",
         title="Histogram of epilepsy metric for mono-5FP",
         plots_subdir=plots_subdir
     )
@@ -86,7 +87,7 @@ with_theme(simple_theme) do
         blocking_epilepsy_metric_arr[block_7fp];
         figure_resolution=figure_resolution,
         colorbar_width=colorbar_width,
-        plot_name="block7fp_epilepsy_metric_hist.png",
+        plot_name="block7fp_epilepsy_metric_hist.$(ext_2d)",
         title="Histogram of epilepsy metric for block-7FP",
         plots_subdir=plots_subdir
     )

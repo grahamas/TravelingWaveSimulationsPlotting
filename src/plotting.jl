@@ -1,4 +1,3 @@
-using Dates#, LaTeXStrings
 
 const POPS = [:E,:I]
 LABEL_DICT = merge(
@@ -57,7 +56,7 @@ function plot_and_save_ax(plot_fn!, args...;
         kwargs...
     )
     figure = Figure(resolution=figure_resolution)
-    figure[1,1] = ax = AbstractPlotting.Axis(figure; Axis...)
+    figure[1,1] = ax = Makie.Axis(figure; Axis...)
 
     plot_fn!(ax, args...; kwargs...)
 

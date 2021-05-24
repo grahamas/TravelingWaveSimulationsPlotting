@@ -1,11 +1,9 @@
-using DrWatson
-using TravelingWaveSimulations, WilsonCowanModel, 
-    TravelingWaveSimulationsPlotting, 
-    Simulation73Plotting, Simulation73
-using TravelingWaveSimulationsPlotting: _collapse_to_axes
-using Dates
-using Makie
-using AxisIndices, IterTools
+# using DrWatson
+# using TravelingWaveSimulations, WilsonCowanModel,
+#     Simulation73Plotting, Simulation73
+# using Dates
+# using Makie
+# using AxisIndices, IterTools
 
 function wcm_sweep_calculate_fixedpoints(prototype_name::String, static_mods, dynamic_mods::NamedTuple{NAMES}; axis_length::Integer=150) where {NAMES}
     if :n_lattice ∉ NAMES

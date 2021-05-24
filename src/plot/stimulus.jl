@@ -39,7 +39,7 @@ function plot_stimulus!(fig::Figure, simulation::Simulation{T};
 
 
     layout = GridLayout()
-    axs = layout[:v] = [AbstractPlotting.Axis(fig) for stim in stimuli]
+    axs = layout[:v] = [Makie.Axis(fig) for stim in stimuli]
     hidedecorations!.(axs[begin:end-1])
     axs[end].xlabel = xlabel
     for (i_ax, ax) in enumerate(axs)

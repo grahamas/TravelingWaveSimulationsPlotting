@@ -184,7 +184,6 @@ end
 
 function calculate_field(field_fn::Function, usvs::Vector{<:AbstractVector{T}}, p) where T
     us, vs = usvs
-    @show us
     dus = Array{T,2}(undef, length(us), length(vs))
     calculate_field!(dus, field_fn, [us,vs], p)
     return dus
@@ -198,7 +197,6 @@ manhattan_norm(x) = sum(abs.(x))
 euclidean_dist(x1::AV, x2::AV) where {AV<:AbstractVector} = sqrt(sum((x1 .- x2) .^ 2)) 
 euclidean_norm(x1::AV) where {AV<:AbstractVector} = _dist(x1, zero(x1))
 
-using DataStructures: MutableLinkedList, ListNode, length
 struct FixedPointList{T,MLL<:MutableLinkedList{T},N,FNS<:NTuple{N,Function},P<:AbstractNullclineParams}
     mll::MLL
     field_fns::FNS

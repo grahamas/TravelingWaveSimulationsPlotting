@@ -1,5 +1,3 @@
-using Simulation73, NeuralModels
-using NeuralModels: AbstractSigmoidNonlinearityParameter, AbstractDifferenceOfSigmoidsParameter
 
 TOL = 0.001
 
@@ -82,7 +80,7 @@ function convert_arguments(nonl::AbstractNonlinearityParameter)
     _auto_range(nonl)
 end
 
-function AbstractPlotting.convert_arguments(P::Type{<:AbstractPlot}, pops::Simulation73.AbstractPOneD{NPOPS,<:AbstractNonlinearityParameter}) where NPOPS
+function Makie.convert_arguments(P::Type{<:AbstractPlot}, pops::Simulation73.AbstractPOneD{NPOPS,<:AbstractNonlinearityParameter}) where NPOPS
     return _auto_range(Simulation73.array(pops))
 end
 
@@ -90,7 +88,6 @@ plot_nonlinearity!(fig::Figure, sim::Simulation, args...; kwargs...) = plot_nonl
 
 plot_nonlinearity!(fig::Figure, model::AbstractModel, args...; kwargs...) = plot_nonlinearity!(fig, model.nonlinearity, args...; pop_names=model.pop_names, kwargs...)
 
-using Colors
 function plot_nonlinearity!(fig::Figure, nonlinearities::Simulation73.AbstractPopulationP;
         pop_names,
         title="Population activation functions")

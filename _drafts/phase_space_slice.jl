@@ -1,6 +1,3 @@
-using IterTools, TravelingWaveSimulations, TravelingWaveSimulationsPlotting, AxisIndices
-
-using TravelingWaveSimulationsPlotting: _collapse_to_axes
 
 mdb_path = joinpath(homedir(), "data", "ring_normed_blocking", "wider_strength_depthreshold_A")
 to_binarize_axes_syms = (:Aee, :Aei)

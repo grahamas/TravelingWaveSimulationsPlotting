@@ -7,7 +7,7 @@ function axisarray_heatmap!(fig::Figure, data::AxisArray,
         colorbar_label="",
         title=""
     )
-    sweep_ax = AbstractPlotting.Axis(fig, title=title)
+    sweep_ax = Makie.Axis(fig, title=title)
     x, y = axes_keys(data)
     heatmap = heatmap!(sweep_ax, x, y, get_data(data), colorrange=colorrange)
     #tightlimits!(sweep_ax)

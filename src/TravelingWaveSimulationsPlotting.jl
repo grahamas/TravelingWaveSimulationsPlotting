@@ -3,8 +3,7 @@ module TravelingWaveSimulationsPlotting
 using DrWatson
 
 using Makie
-using AbstractPlotting: MakieLayout
-using AbstractPlotting.MakieLayout
+using Makie.MakieLayout
 using TravelingWaveSimulations, Simulation73, NeuralModels, Simulation73Plotting, WilsonCowanModel
 using Interpolations, DiffEqOperators, Optim, LinearAlgebra
 using AxisIndices
@@ -15,6 +14,16 @@ using LoopVectorization
 using LinearAlgebra
 using ForwardDiff
 using OffsetArrays
+using Roots
+using Dates
+using Colors
+
+using DataStructures: MutableLinkedList, ListNode, length
+
+using NeuralModels: AbstractSigmoidNonlinearityParameter, AbstractDifferenceOfSigmoidsParameter
+
+using WilsonCowanModel: wcm_du_defn, wcm_dv_defn, WCMParams, AbstractNullclineParams, get_nullcline_params
+using Makie: @lift
 
 include("util/axisarray.jl")
 include("util/lines.jl")

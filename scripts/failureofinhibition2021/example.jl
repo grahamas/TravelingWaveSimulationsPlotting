@@ -1,5 +1,8 @@
 using TravelingWaveSimulations, WilsonCowanModel, TravelingWaveSimulationsPlotting, Simulation73Plotting,
-        DrWatson, Dates
+Simulation73, DrWatson, Dates
+
+#using GLMakie; ext_2d = "png"; GLMakie.activate!()
+using CairoMakie; ext_2d = "svg"; CairoMakie.activate!(); 
 
 let example_name = "pathophysio_example",
     session_id = "$(Dates.now())",
@@ -21,13 +24,13 @@ params = get_nullcline_params(sim)
 
 plot_and_save(plot_nullclines!, params, 100; 
     plots_subdir=example_dir,
-    plot_name="$(example_name)_nullclines.png",
+    plot_name="$(example_name)_nullclines.$(ext_2d)",
     figure_resolution=figure_resolution
 )
 
 plot_and_save(plot_nonlinearity!, sim; 
     plots_subdir=example_dir,
-    plot_name="$(example_name)_nonlinearity.png",
+    plot_name="$(example_name)_nonlinearity.$(ext_2d)",
     figure_resolution=figure_resolution
 )
 
@@ -36,7 +39,7 @@ for stim_strength in stim_strengths
     exec = execute(sim);
     plot_and_save(exec_heatmap!, exec;
         plots_subdir=example_dir,
-        plot_name="$(example_name)_heatmap_strength$(stim_strength).png"
+        plot_name="$(example_name)_heatmap_strength$(stim_strength).$(ext_2d)"
     ) 
 end
 

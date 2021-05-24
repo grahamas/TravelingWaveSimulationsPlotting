@@ -1,6 +1,6 @@
 using TravelingWaveSimulationsPlotting, TravelingWaveSimulations
 using Dates
-using Makie, AbstractPlotting
+using Makie
 
 session_name = "wider_strength_depthreshold_A"
 session_id = "$(Dates.now())"

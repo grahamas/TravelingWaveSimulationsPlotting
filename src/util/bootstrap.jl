@@ -91,5 +91,5 @@ function subsamples_over_axes(naa::NamedAxisArray, axis_names,
     return NamedAxesSubsampleIdxs(naa, axes_dict, min_N, max_N, n_samples)
 end
 
-import AbstractPlotting: convert_arguments
+import Makie: convert_arguments
 convert_arguments(est::Estimated) = (est.estimate,)

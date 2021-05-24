@@ -4,14 +4,14 @@ using Makie, Colors
     default_theme(scene, BarPlot)
 end
 
-AbstractPlotting.conversion_trait(::Type{GroupedBarPlot}) = AbstractPlotting.NoConversion()
+Makie.conversion_trait(::Type{GroupedBarPlot}) = Makie.NoConversion()
 
-function AbstractPlotting.plot!(p::GroupedBarPlot)
+function Makie.plot!(p::GroupedBarPlot)
     widths = lift(p.width, p[1], p[2]) do width, x, groups
         n_x, n_groups = length(x), length(groups)
         extra_space = sum(diff(x)) / n_x # half of this on either end
         group_span = (x[end] - x[begin] + extra_space) / n_x
-        if width === AbstractPlotting.automatic
+        if width === Makie.automatic
             bars_span = group_span * 0.8
             bar_span = bars_span / n_groups
             [bar_span for group in groups]
@@ -58,4 +58,4 @@ function AbstractPlotting.plot!(p::GroupedBarPlot)
     p
 end
 
-AbstractPlotting.Legend(fig_or_scene, grouped_bar::GroupedBarPlot, args...; kwargs...) = Legend(fig_or_scene, grouped_bar.plots, args...; kwargs...)
+Makie.Legend(fig_or_scene, grouped_bar::GroupedBarPlot, args...; kwargs...) = Legend(fig_or_scene, grouped_bar.plots, args...; kwargs...)

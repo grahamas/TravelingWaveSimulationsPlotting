@@ -1,4 +1,3 @@
-using Colors
 
 # FIXME this should really dispatch to 
 #   (::Figure, ::AbstractModel, ::AbstractSpace)
@@ -10,7 +9,7 @@ function plot_connectivity!(fig::Figure, simulation::Simulation{T,M};
         xlabel = "distance (μm)", ylabel = "connectivity strength (a.u.)",
         xlims = nothing, ylims = nothing,
         kwargs...) where {T, M<:AbstractWilsonCowanModel{T,1}}
-    ax = AbstractPlotting.Axis(fig,
+    ax = Makie.Axis(fig,
               xlabel = xlabel, # FIXME encode units in simulation
               ylabel = ylabel)
     if title !== nothing
@@ -41,7 +40,7 @@ function plot_connectivity!(fig::Figure, simulation::Simulation{T,M};
         lines!(ax, dists[x_idxs], kern[x_idxs], color=colors[Tuple(idx)[onto_pop_idx]])
     end
     legend_names = ["onto $pop" for pop in pop_names]
-    AbstractPlotting.axislegend(ax, plots[1:n_pops], legend_names,
+    Makie.axislegend(ax, plots[1:n_pops], legend_names,
                   #tellheight=false, tellwidth=false,
                   position=:rt, orientation=:vertical)
     tightlimits!(ax)

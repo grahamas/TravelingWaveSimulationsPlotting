@@ -1,5 +1,4 @@
-using WilsonCowanModel: wcm_du_defn, wcm_dv_defn, WCMParams, AbstractNullclineParams, get_nullcline_params
-using Makie: @lift
+
 
 
 function lifted_wcm_param(;
@@ -13,49 +12,56 @@ function lifted_wcm_param(;
         )
 end
 
-using OffsetArrays
-
 function plot_nullclines!(fig::Figure, p::Union{AbstractWCMDepNullclineParams, AbstractWCMNullclineParams}, axis_length::Integer=100; kwargs...)
     plot_nullclines!(fig, p, [range(0., 1., length=axis_length), range(0., 1., length=axis_length)]; kwargs...)
 end
 function plot_nullclines!(fig::Figure, p::Union{AbstractWCMDepNullclineParams, AbstractWCMNullclineParams}, nullcline_axes::AbstractVector{<:AbstractVector};
         xlabel="E", ylabel="I", 
         title="",
-        mark_fp=true, arrows_step=nothing,
-        linewidth=1)
+        linewidth=2,
+        mark_fp=true, arrows_step=nothing
+        )
     ax = MakieLayout.Axis(fig, aspect=DataAspect(),
         xlabel=xlabel, ylabel=ylabel,
+        xticks=[0,1], yticks=[0,1],
         title=title
     )
-
+ 
     dus = calculate_field(wcm_du_defn, nullcline_axes, p)
     dvs = calculate_field(wcm_dv_defn, nullcline_axes, p)
     u_nullclines = lines(contour(nullcline_axes..., dus, 0.))
     v_nullclines = lines(contour(nullcline_axes..., dvs, 0.))
 
-    for line in u_nullclines
-        xs, ys = coordinates(line)
-        Makie.lines!(ax, xs, ys, color=:blue, linewidth=linewidth)
-    end
-
-    for line in v_nullclines
-        xs, ys = coordinates(line)
-        Makie.lines!(ax, xs, ys, color=:red, linestyle=:dash, linewidth=linewidth)
-    end
-
-    if mark_fp
-        fixedpoints = calculate_fixedpoints(p, length(nullcline_axes[1]))
-        stability = fixedpoint_stability.(Ref(p), fixedpoints)
-        stability_marker = getindex.(Ref(STABILITY_MARKERS), stability)
-        scatter!(ax, Point2f0.(fixedpoints), marker=stability_marker, markersize=15)
-    end
 
     if arrows_step !== nothing
         arrow_axis = 0.:arrows_step:1. |> collect
         arrow_axes = [arrow_axis, arrow_axis]
         dus = calculate_field(wcm_du_defn, arrow_axes, p)
         dvs = calculate_field(wcm_dv_defn, arrow_axes, p)
-        arrows!(ax, arrow_axis, arrow_axis, dus, dvs; arrowsize = 0.03, normalize=true, lengthscale=0.02f0)
+        arrows!(ax, arrow_axis, arrow_axis, dus, dvs; arrowsize = 0.025, normalize=true, lengthscale=0.02f0, arrowcolor=:grey, linecolor=:grey)
+    end
+
+    for line in u_nullclines
+        xs, ys = coordinates(line)
+        Makie.lines!(ax, xs, ys; 
+            linewidth=linewidth,
+            color=:blue
+        )
+    end
+
+    for line in v_nullclines
+        xs, ys = coordinates(line)
+        Makie.lines!(ax, xs, ys, color=:red, 
+            linewidth=linewidth,
+            linestyle=:dash
+        )
+    end
+
+    if mark_fp
+        fixedpoints = calculate_fixedpoints(p, length(nullcline_axes[1]))
+        stability = fixedpoint_stability.(Ref(p), fixedpoints)
+        stability_marker = getindex.(Ref(STABILITY_MARKERS), stability)
+        scatter!(ax, Point2f0.(fixedpoints), marker=stability_marker, markersize=15, color=:darkgrey)
     end
 
     xlims!(ax, 0., 1.)
@@ -98,7 +104,6 @@ function calculate_fixedpoints(mdb_path::AbstractString, new_mods::NamedTuple{NA
     return fixedpoints_arr, combined_mods, prototype
 end
 
-using Roots
 function Roots.find_zero(fn::Function, (p1,p2)::Tuple{PT,PT}, args...; kwargs...) where {N,T, PT<:SVector{N,T}}
     interp(x) = x .* p1 .+ (1-x) .* p2
     interp_zero = find_zero(x -> fn(interp(x)), (0, 1), args...; kwargs...)

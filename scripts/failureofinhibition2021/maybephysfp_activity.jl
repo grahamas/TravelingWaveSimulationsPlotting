@@ -4,7 +4,8 @@ using TravelingWaveSimulations, WilsonCowanModel,
     Simulation73Plotting, Simulation73
 using TravelingWaveSimulationsPlotting: _collapse_to_axes
 using Dates
-using Makie
+#using GLMakie; ext_2d = "png"; GLMakie.activate!()
+using CairoMakie; ext_2d = "svg"; CairoMakie.activate!()
 using AxisIndices
 
 # loads blocking_fp_arr and monotonic_fp_arr
@@ -21,6 +22,7 @@ let blocking_fp_arr = blocking_fp_arr[Aee=sub_A_range,Aei=sub_A_range,Aie=sub_A_
     monotonic_fp_count_arr = length.(monotonic_fp_arr),
     blocking_prototype_name = "full_dynamics_blocking",
     monotonic_prototype_name = "full_dynamics_monotonic",
+    arrows_step=0.05,
     smods = (
         α=(0.4, 0.7), 
         firing_θI=0.2, blocking_θI=0.5, 
@@ -66,7 +68,7 @@ blocking_3sfp_emetrics = epilepsy_metric.(blocking_fp_arr[n_sfp_blocking .== 3])
 plot_and_save_ax(hist!,
     blocking_3sfp_emetrics,
     figure_resolution=figure_resolution,
-    plot_name="blocking_3sfp_emetric_hist.png",
+    plot_name="blocking_3sfp_emetric_hist.$(ext_2d)",
     Axis = (
         title="3SFP (blocking)",
         ylabel="count",
@@ -79,7 +81,7 @@ plot_and_save_ax(hist!,
 plot_and_save_ax(hist!,
     blocking_fp_arr[n_sfp_blocking .== 3] .|> fps -> maximum(first.(fps)),
     figure_resolution=figure_resolution,
-    plot_name="blocking_3sfp_max_excitation_hist.png",
+    plot_name="blocking_3sfp_max_excitation_hist.$(ext_2d)",
     Axis = (
         title="3SFP (blocking)",
         ylabel="count",
@@ -93,7 +95,7 @@ monotonic_3sfp_emetrics = epilepsy_metric.(monotonic_fp_arr[n_sfp_monotonic .== 
 plot_and_save_ax(hist!,
     monotonic_3sfp_emetrics,
     figure_resolution=figure_resolution,
-    plot_name="monotonic_3sfp_emetric_hist.png",
+    plot_name="monotonic_3sfp_emetric_hist.$(ext_2d)",
     Axis = (
         title="3SFP (monotonic)",
         ylabel="count",
@@ -105,7 +107,7 @@ plot_and_save_ax(hist!,
 plot_and_save_ax(hist!,
     monotonic_fp_arr[n_sfp_monotonic .== 3] .|> fps -> maximum(first.(fps)),
     figure_resolution=figure_resolution,
-    plot_name="monotonic_3sfp_max_excitation_hist.png",
+    plot_name="monotonic_3sfp_max_excitation_hist.$(ext_2d)",
     Axis = (
         title="3SFP (monotonic)",
         ylabel="count",
@@ -117,7 +119,7 @@ plot_and_save_ax(hist!,
 plot_and_save_ax(hist!,
     epilepsy_metric.(monotonic_fp_arr[n_sfp_blocking .== 3]) |> collect,
     figure_resolution=figure_resolution,
-    plot_name="monotonic_former3sfp_emetric_hist.png",
+    plot_name="monotonic_former3sfp_emetric_hist.$(ext_2d)",
     Axis = (
         title="3SFP blocking -> monotonic",
         ylabel="count",
@@ -129,7 +131,7 @@ plot_and_save_ax(hist!,
 plot_and_save_ax(hist!,
     monotonic_fp_arr[n_sfp_blocking .== 3] .|> fps -> maximum(first.(fps)),
     figure_resolution=figure_resolution,
-    plot_name="monotonic_former3sfp_max_excitation_hist.png",
+    plot_name="monotonic_former3sfp_max_excitation_hist.$(ext_2d)",
     Axis = (
         title="3SFP blocking -> monotonic",
         ylabel="count",
@@ -141,7 +143,7 @@ plot_and_save_ax(hist!,
 plot_and_save_ax(hist!,
     n_sfp_monotonic[n_sfp_blocking .== 3],
     figure_resolution=figure_resolution,
-    plot_name="monotonic_former3sfp_sfp_count.png",
+    plot_name="monotonic_former3sfp_sfp_count.$(ext_2d)",
     Axis = (
         title="3SFP blocking -> monotonic",
         ylabel="count",
@@ -153,7 +155,7 @@ plot_and_save_ax(hist!,
 plot_and_save_ax(hist!,
     epilepsy_metric.(monotonic_fp_arr[epilepsy_metric.(blocking_fp_arr) .> 0.71]) |> collect,
     figure_resolution=figure_resolution,
-    plot_name="monotonic_formermaxEp_emetric_hist.png",
+    plot_name="monotonic_formermaxEp_emetric_hist.$(ext_2d)",
     Axis = (
         title="Maximal EM score blocking -> monotonic",
         ylabel="count",
@@ -165,7 +167,7 @@ plot_and_save_ax(hist!,
 plot_and_save_ax(hist!,
     monotonic_fp_arr[epilepsy_metric.(blocking_fp_arr) .> 0.71] .|> fps -> maximum(first.(fps)),
     figure_resolution=figure_resolution,
-    plot_name="monotonic_formermaxEp_max_excitation_hist.png",
+    plot_name="monotonic_formermaxEp_max_excitation_hist.$(ext_2d)",
     Axis = (
         title="Maximal EM score blocking -> monotonic",
         ylabel="count",
@@ -177,7 +179,7 @@ plot_and_save_ax(hist!,
 plot_and_save_ax(hist!,
     monotonic_fp_arr[map(fps -> maximum(first.(fps)), blocking_fp_arr) .> 0.71] .|> fps -> maximum(first.(fps)),
     figure_resolution=figure_resolution,
-    plot_name="monotonic_formermaxE_max_excitation_hist.png",
+    plot_name="monotonic_formermaxE_max_excitation_hist.$(ext_2d)",
     Axis = (
         title="Maximal E blocking -> monotonic",
         ylabel="count",
@@ -189,7 +191,7 @@ plot_and_save_ax(hist!,
 plot_and_save_ax(hist!,
     monotonic_stable_fp_arr[map(fps -> maximum(first.(fps)), blocking_fp_arr) .> 0.71] .|> fps -> maximum(first.(fps)),
     figure_resolution=figure_resolution,
-    plot_name="monotonic_STABLE_formermaxE_max_excitation_hist.png",
+    plot_name="monotonic_STABLE_formermaxE_max_excitation_hist.$(ext_2d)",
     Axis = (
         title="Maximal E blocking -> monotonic (stable)",
         ylabel="count",
@@ -213,7 +215,7 @@ for (sym, fp_arr) ∈ [(:monotonic, monotonic_fp_arr), (:blocking, blocking_fp_a
     plot_and_save_ax(hist!,
         skipmissing(all_fp_Es) |> collect,
         figure_resolution=figure_resolution,
-        plot_name="allfp_$(sym)_excitatory_activity_hist.png",
+        plot_name="allfp_$(sym)_excitatory_activity_hist.$(ext_2d)",
         plots_subdir=plots_subdir,
         Axis = (
             title="All FP ($(sym))",
@@ -240,7 +242,7 @@ for (sym, fp_arr, prototype_name) ∈ [(:monotonic, monotonic_fp_arr, "full_dyna
     plot_and_save_ax(hist!,
         skipmissing(stable_fp_Es) |> collect,
         figure_resolution=figure_resolution,
-        plot_name="stablefp_$(sym)_excitatory_activity_hist.png",
+        plot_name="stablefp_$(sym)_excitatory_activity_hist.$(ext_2d)",
         plots_subdir=plots_subdir,
         Axis = (
             title="Stable FP ($(sym))",
@@ -262,12 +264,12 @@ for (sym, fp_arr) ∈ [(:monotonic, monotonic_fp_arr), (:blocking, blocking_fp_a
     plot_and_save_ax(hist!,
         skipmissing(all_fp_emetrics) |> collect,
         figure_resolution=figure_resolution,
-        plot_name="allfp_$(sym)_epilepsy_metric_hist.png",
+        plot_name="allfp_$(sym)_epilepsy_metric_hist.$(ext_2d)",
         plots_subdir=plots_subdir,
         Axis = (
             title="All FP ($(sym))",
             ylabel="count",
-            xlabel="epilepsy metric"
+            xlabel="EI contrast"
         )
     )
 end
@@ -288,12 +290,12 @@ for (sym, fp_arr, n_sfp_arr, prototype_name) ∈ [(:monotonic, monotonic_fp_arr,
     plot_and_save_ax(hist!,
         skipmissing(stable_fp_Es) |> collect,
         figure_resolution=figure_resolution,
-        plot_name="stablefp_$(sym)_epilepsy_metric_hist.png",
+        plot_name="stablefp_$(sym)_epilepsy_metric_hist.$(ext_2d)",
         plots_subdir=plots_subdir,
         Axis = (
             title="Stable FP ($(sym))",
             ylabel="count",
-            xlabel="epilepsy metric"
+            xlabel="EI contrast"
         )
     )
 
@@ -303,7 +305,8 @@ for (sym, fp_arr, n_sfp_arr, prototype_name) ∈ [(:monotonic, monotonic_fp_arr,
     @show "$sym 3SFP: $example_3sfp_coord"
     plot_and_save(plot_nullclines!,
         get_nullcline_params(prototype(; smods..., example_3sfp_coord...));
-        plot_name="nullclines_3sfp_$(sym).png",
+        plot_name="nullclines_3sfp_$(sym).$(ext_2d)",
+        arrows_step=arrows_step,
         plots_subdir=plots_subdir
     )
     if sym == :blocking
@@ -313,7 +316,8 @@ for (sym, fp_arr, n_sfp_arr, prototype_name) ∈ [(:monotonic, monotonic_fp_arr,
         @show "4FP: $example_4sfp_coord"
         plot_and_save(plot_nullclines!,
             get_nullcline_params(prototype(; smods..., example_4sfp_coord...));
-            plot_name="nullclines_4sfp_$(sym).png",
+            plot_name="nullclines_4sfp_$(sym).$(ext_2d)",
+            arrows_step=arrows_step,
             plots_subdir=plots_subdir
         )
 
@@ -323,7 +327,8 @@ for (sym, fp_arr, n_sfp_arr, prototype_name) ∈ [(:monotonic, monotonic_fp_arr,
         @show "7FP: $example_7fp_coord"
         plot_and_save(plot_nullclines!,
             get_nullcline_params(prototype(; smods..., example_7fp_coord...));
-            plot_name="nullclines_7fp_$(sym).png",
+            plot_name="nullclines_7fp_$(sym).$(ext_2d)",
+            arrows_step=arrows_step,
             plots_subdir=plots_subdir
         )
     end
@@ -333,7 +338,8 @@ for (sym, fp_arr, n_sfp_arr, prototype_name) ∈ [(:monotonic, monotonic_fp_arr,
     @show "Both: $example_both_3sfp_coord"
     plot_and_save(plot_nullclines!,
         get_nullcline_params(prototype(; smods..., example_both_3sfp_coord...));
-        plot_name="nullclines_both_3sfp_$(sym).png",
+        plot_name="nullclines_both_3sfp_$(sym).$(ext_2d)",
+        arrows_step=arrows_step,
         plots_subdir=plots_subdir
     )
 end
@@ -361,29 +367,29 @@ for (sym, fp_arr, prototype_name) ∈ [(:blocking, blocking_fp_arr, "full_dynami
     plot_and_save_ax(hist!,
         skipmissing(mid_7fp_emetrics) |> collect,
         figure_resolution=figure_resolution,
-        plot_name="mid7fp_$(sym)_epilepsy_metric_hist.png",
+        plot_name="mid7fp_$(sym)_epilepsy_metric_hist.$(ext_2d)",
         Axis = (
             title="mid-7FP ($sym)",
             ylabel="count",
-            xlabel="epilepsy metric"
+            xlabel="EI contrast"
         ),
         plots_subdir=plots_subdir
     )
     plot_and_save_ax(hist!,
         skipmissing(mid_7fp_stable_emetrics) |> collect,
         figure_resolution=figure_resolution,
-        plot_name="mid7fp_stable_$(sym)_epilepsy_metric_hist.png",
+        plot_name="mid7fp_stable_$(sym)_epilepsy_metric_hist.$(ext_2d)",
         Axis = (
             title="stable mid-7FP ($sym)",
             ylabel="count",
-            xlabel="epilepsy metric"
+            xlabel="EI contrast"
         ),
         plots_subdir=plots_subdir
     )
      plot_and_save_ax(hist!,
         skipmissing(mid_7fp_Es) |> collect,
         figure_resolution=figure_resolution,
-        plot_name="mid7fp_$(sym)_excitatory_hist.png",
+        plot_name="mid7fp_$(sym)_excitatory_hist.$(ext_2d)",
         Axis = (
             title="mid-7FP ($sym)",
             ylabel="count",
@@ -394,7 +400,7 @@ for (sym, fp_arr, prototype_name) ∈ [(:blocking, blocking_fp_arr, "full_dynami
     plot_and_save_ax(hist!,
         skipmissing(mid_7fp_stable_Es) |> collect,
         figure_resolution=figure_resolution,
-        plot_name="mid7fp_stable_$(sym)_excitatory_hist.png",
+        plot_name="mid7fp_stable_$(sym)_excitatory_hist.$(ext_2d)",
         Axis = (
             title="stable mid-7FP ($sym)",
             ylabel="count",
