@@ -1,20 +1,23 @@
-using GLMakie; ext_2d = "png"; GLMakie.activate!()
-#using CairoMakie; ext_2d = "svg"; CairoMakie.activate!(); 
+#using GLMakie; ext_2d = "png"; GLMakie.activate!()
+using CairoMakie; ext_2d = "svg"; CairoMakie.activate!(); 
 using DrWatson, Dates
+using Colors
 
 let figure_name = "nonlinearity_derivation",
     N = 1000,
+    fig_resolution=(800,600),
     simple_theme = Theme(
         linewidth = 3.0,
-        fontsize=18,
+        fontsize=24,
+        backgroundcolor =  RGBA(1.,1.,1.,0.),
         Axis = (
-            backgroundcolor = :white,
+            backgroundcolor = RGBA(1.,1.,1.,0.),
             leftspinevisible = true,
             rightspinevisible = false,
             bottomspinevisible = true,
             topspinevisible = false,
-            xgridcolor = :white,
-            ygridcolor = :white,
+            xgridcolor = RGBA(1.,1.,1.,0.),
+            ygridcolor = RGBA(1.,1.,1.,0.),
         )
     ) ;
 
@@ -35,7 +38,7 @@ xs = collect(0.0:0.001:0.3)
 example_monotonic_nonl = is_firing.(example_firing_threshold .<= xs)
 example_failing_nonl = is_firing.(example_firing_threshold .<= xs .<= example_failing_threshold)
 
-fig = Figure()
+fig = Figure(resolution=fig_resolution)
 fig[1,1] = ax_firing_example = Axis(fig, ylabel="firing?",
     yticks=[0,1])
 lines!(ax_firing_example, xs, example_monotonic_nonl)
@@ -50,7 +53,7 @@ for θ ∈ θ_firing
 end
 firing_accum ./= length(θ_firing)
 fig[3,1] = ax_firing_accum = Axis(fig,
-    xlabel="input", ylabel="proportion firing")
+    xlabel="input", ylabel="prop. firing")
 lines!(ax_firing_accum, xs, firing_accum)
 
 fig[1,2] = ax_failing_example = Axis(fig)
@@ -78,8 +81,8 @@ hidedecorations!.([ax_failing_example,
                    ax_failing_accum])
 hidexdecorations!.([ax_firing_many, ax_firing_example])
 
-fig[0,1] = Label(fig, "monotonic", tellwidth=false)
-fig[1,2] = Label(fig, "failing", tellwidth=false)
+fig[0,1] = Label(fig, "fire", tellwidth=false)
+fig[1,2] = Label(fig, "fire → fail", tellwidth=false)
 
 mkpath(subplotsdir())
 save(subplotsdir("$(figure_name).$(ext_2d)"), fig)
