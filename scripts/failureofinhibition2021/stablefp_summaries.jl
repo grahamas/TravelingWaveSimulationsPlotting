@@ -8,7 +8,7 @@ using Makie
 #using GLMakie; ext_2d = "png"; GLMakie.activate!()
 using CairoMakie; ext_2d = "svg"; CairoMakie.activate!()
 using AxisIndices
-using AlgebraOfGraphics
+using AlgebraOfGraphics, ColorSchemes
 using DataFrames
 
 # loads failing_fp_arr and monotonic_fp_arr
@@ -55,28 +55,31 @@ let nt_map(fn::Function, nt::NamedTuple{NS}) where NS = NamedTuple{NS}(map(fn, v
         end
     end,
     bar_theme = Theme(
-        fontsize=48,
+        fontsize=56,
+        strokewidth= 5.,
         Axis = (
-            backgroundcolor = :white,
+            backgroundcolor = RGBA(1.,1.,1.,0.),
             leftspinevisible = true,
             rightspinevisible = false,
             bottomspinevisible = true,
             topspinevisible = false,
-            xgridcolor = :white,
-            ygridcolor = :white,
+            xgridcolor = RGBA(1.,1.,1.,0.),
+            ygridcolor = RGBA(1.,1.,1.,0.),
+            strokewidth= 5.,
             ytickformat = xs -> abbrev_count_label.(xs)
         )
     ),
     nullcline_theme = Theme(
         fontsize=48,
         Axis = (
-            backgroundcolor = :white,
+            backgroundcolor = RGBA(1.,1.,1.,0.),
             leftspinevisible = true,
             rightspinevisible = false,
             bottomspinevisible = true,
             topspinevisible = false,
-            xgridcolor = :white,
-            ygridcolor = :white
+            strokewidth=2.,
+            xgridcolor = RGBA(1.,1.,1.,0.),
+            ygridcolor = RGBA(1.,1.,1.,0.)
         ),
         Lines = (
             linewidth=4.0,
@@ -178,13 +181,21 @@ end
 with_theme(bar_theme) do
     SI_condition_frequency = data(unrolled_SI_df) * frequency() * mapping(:nonl_type)
     SI_stacks = SI_condition_frequency * mapping(color=:condition, stack=:condition)
+    axis = merge(axis, (title="seizure index",))
     fig = draw(SI_stacks; axis)
+    fig.figure.current_axis.x.xlabel = "inh. nonlinearity"
+    tightylimits!(fig)
     save(plotsdir(plots_subdir, "stablefp_SI_distribution.$(ext_2d)"), fig)
 
     E_condition_frequency = data(unrolled_E_df) * frequency() * mapping(:nonl_type)
     E_stacks = E_condition_frequency * mapping(color=:condition, stack=:condition)
+    axis = merge(axis, (title="excitatory activity",))
     fig = draw(E_stacks; axis)
+    fig.figure.current_axis.x.xlabel = "inh. nonlinearity"
+    tightylimits!(fig)
     save(plotsdir(plots_subdir, "stablefp_E_distribution.$(ext_2d)"), fig)
+
+    fig
 
 end # bar_theme
 
