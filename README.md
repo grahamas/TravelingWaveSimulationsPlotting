@@ -1,4 +1,4 @@
-# TravelingWaveSimulations
+# TravelingWaveSimulationsPlotting
 Visualize ensemble simulations of neural activity with analyses of traveling wave behavior (Ph.D. thesis project)
 
 ## Installation
