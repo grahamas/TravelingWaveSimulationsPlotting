@@ -39,7 +39,7 @@ end
 _potential_range(::AbstractNonlinearityParameter) = 0.:0.01:100.
 function _potential_range(sig::AbstractSigmoidNonlinearityParameter)
     @assert sig.a > 0
-    nearly_one = NeuralModels.inverse_simple_sigmoid_fn(0.999, sig.a, sig.θ)
+    nearly_one = NeuralModels.inverse_simple_sigmoid(0.999, sig.a, sig.θ)
     radius = nearly_one - sig.θ
     return range(sig.θ-radius, stop=nearly_one, length=100)
 end

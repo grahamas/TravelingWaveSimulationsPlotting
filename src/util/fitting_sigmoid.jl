@@ -7,7 +7,7 @@ struct FittedSigmoid{T}
 end
 FittedSigmoid(::Missing) = FittedSigmoid{Missing}(missing, missing, missing, missing, missing)
 
-(s::FittedSigmoid)(x) = s.left_val .+ s.change .* NeuralModels.simple_sigmoid_fn(x, s.slope, s.threshold)
+(s::FittedSigmoid)(x) = s.left_val .+ s.change .* NeuralModels.simple_sigmoid(x, s.slope, s.threshold)
 
 fit_sigmoid(::Nothing, ::Nothing) = FittedSigmoid(missing)
 function fit_sigmoid(ys, xs)
@@ -21,8 +21,8 @@ function fit_sigmoid(ys, xs)
     end
     left_val = ys[begin]
     sigmoid_change = ys[end] - ys[begin]
-    sigmoid_fn(params) = left_val .+ sigmoid_change .* NeuralModels.simple_sigmoid_fn.(xs, params[1], params[2])
-    loss(params) = l2(ys, sigmoid_fn(params))
+    sigmoid(params) = left_val .+ sigmoid_change .* NeuralModels.simple_sigmoid.(xs, params[1], params[2])
+    loss(params) = l2(ys, sigmoid(params))
     D = CenteredDifference{1}(1, 2, xs[2] - xs[1], length(ys))
     derivative_estimate = D*ys
     slope_est, i_max = findmax(abs.(derivative_estimate[begin+1:end-1]))

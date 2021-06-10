@@ -1,9 +1,9 @@
-using NeuralModels: simple_sigmoid_fn
+using NeuralModels: simple_sigmoid
 using GLMakie
 
-my_model(x, (a_1, a_2), (θ_1, θ_2)) = simple_sigmoid_fn(x, a_1, θ_1) - simple_sigmoid_fn(x, a_2, θ_2)
+my_model(x, (a_1, a_2), (θ_1, θ_2)) = simple_sigmoid(x, a_1, θ_1) - simple_sigmoid(x, a_2, θ_2)
 
-kim_model(x, (a_1, a_2), (θ_1, θ_2)) = simple_sigmoid_fn(x, a_1, θ_1)  * (1-simple_sigmoid_fn(x, a_2, θ_2))
+kim_model(x, (a_1, a_2), (θ_1, θ_2)) = simple_sigmoid(x, a_1, θ_1)  * (1-simple_sigmoid(x, a_2, θ_2))
 
 low_gain = (1.0, 1.0)
 high_gain = (50.0, 50.0)
