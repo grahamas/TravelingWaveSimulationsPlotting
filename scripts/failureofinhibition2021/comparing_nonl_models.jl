@@ -1,5 +1,5 @@
 using NeuralModels: simple_sigmoid
-using GLMakie
+using CairoMakie
 
 my_model(x, (a_1, a_2), (θ_1, θ_2)) = simple_sigmoid(x, a_1, θ_1) - simple_sigmoid(x, a_2, θ_2)
 
