@@ -1,7 +1,7 @@
 name = "TravelingWaveSimulationsPlotting"
 uuid = "090ce58c-883b-45c9-8a81-7f2bda835033"
 authors = ["Graham Smith <grahamas@gmail.com>"]
-version = "0.2.1"
+version = "0.2.2"
 
 [deps]
 AlgebraOfGraphics = "cbdf2221-f076-402e-a563-3d30da359d67"
@@ -33,6 +33,7 @@ NeuralModels = "a199b2c4-7a51-11e9-2fe1-b9a1a5fe2912"
 OffsetArrays = "6fe1bfb0-de20-5000-8ca7-80f57d26f881"
 Optim = "429524aa-4258-5aef-a3af-852621145aeb"
 OrdinaryDiffEq = "1dea7af3-3e70-54e6-95c3-0bf5283fa5ed"
+ProgressMeter = "92933f4c-e287-5a05-a399-4b506db050ca"
 Roots = "f2b01f46-fcfa-551c-844a-d8ac1e96c665"
 Simulation73 = "310cc8c8-1ffe-11e9-399c-c5a008d6bdcc"
 Simulation73Plotting = "2846d769-be22-4083-a76c-fdabc4869842"
