@@ -18,8 +18,8 @@ function _save!(fig, plot_name;
         unique_id="$(Dates.now())",
         session_id=unique_id,
         session_name="unnnamedsession",
-        plots_subdir=plotsdir("$(session_name)_$(session_id)"))
-    mkpath(plots_subdir)
+        plots_subdir="$(session_name)_$(session_id)")
+    mkpath(plotsdir(plots_subdir))
     save_path = plotsdir(plots_subdir, plot_name)
     @info "saving $save_path"
     Makie.save(save_path, fig)
@@ -31,7 +31,7 @@ function plot_and_save(plot_fn!, args...;
         unique_id="$(Dates.now())",
         session_id=unique_id,
         session_name="unnnamedsession",
-        plots_subdir=plotsdir("$(session_name)_$(session_id)"),
+        plots_subdir="$(session_name)_$(session_id)",
         plot_name = "$(strip(string(plot_fn!), '!'))_$(unique_id).png",
         figure_resolution=(500, 500),
         kwargs...)
@@ -49,7 +49,7 @@ function plot_and_save_ax(plot_fn!, args...;
         unique_id="$(Dates.now())",
         session_id=unique_id,
         session_name="unnnamedsession",
-        plots_subdir=plotsdir("$(session_name)_$(session_id)"),
+        plots_subdir="$(session_name)_$(session_id)",
         plot_name = "$(strip(string(plot_fn!), '!'))_$(unique_id).png",
         figure_resolution=(500, 500),
         Axis = (;),

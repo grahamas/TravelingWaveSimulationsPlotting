@@ -176,7 +176,7 @@ end
 function calculate_field!(field_vals::AbstractMatrix{T}, field_fn::Function, usvs::Vector{<:AbstractVector{T}}, p) where T
     us, vs = usvs
     us = collect(us); vs = collect(vs) # FIXME remove line when VectorizationBase updates to v0.18.3(ish)
-    @avx for u_idx ∈ axes(us,1), v_idx ∈ axes(vs,1)
+    @turbo for u_idx ∈ axes(us,1), v_idx ∈ axes(vs,1)
         field_vals[u_idx, v_idx] = field_fn(us[u_idx], vs[v_idx], p)
     end
     field_vals
