@@ -23,7 +23,7 @@ using DataStructures: MutableLinkedList, ListNode, length
 
 using NeuralModels: AbstractSigmoidNonlinearityParameter, AbstractDifferenceOfSigmoidsParameter
 
-using WilsonCowanModel: wcm_du_defn, wcm_dv_defn, WCMParams, AbstractNullclineParams, get_nullcline_params
+using WilsonCowanModel: wcm_du_defn, wcm_dv_defn, WCMMonParams, AbstractNullclineParams, get_nullcline_params
 using Makie: @lift
 
 include("util/axisarray.jl")

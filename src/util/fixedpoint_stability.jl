@@ -8,7 +8,12 @@ function jacobian_is_stable(jac::Matrix)
     all(real.(eigvals(jac)) .< 0)
 end
 function fixedpoint_is_stable(nullcline_params, fp)
-    @assert all(abs.(derive_vector_fn(nullcline_params)(fp)) .< sqrt(eps())) derive_vector_fn(nullcline_params)(fp)
+    if !all(abs.(derive_vector_fn(nullcline_params)(fp)) .< sqrt(eps()))
+        @info "$(derive_vector_fn(nullcline_params)(fp)), $(
+                apply_field_fns(
+                    [wcm_du_defn, wcm_dv_defn], fp, nullcline_params)
+                ), $fp"
+    end
     jac_fn = derive_jacobian_fn(nullcline_params)
     jac = jac_fn(fp)
     jacobian_is_stable(jac)
@@ -18,7 +23,7 @@ function jacobian_is_oscillatory(jac::Matrix)
     any(imag.(eigvals(jac)) .!= 0)
 end
 function fixedpoint_is_oscillatory(nullcline_params::AbstractNullclineParams, fp)
-    @assert all(abs.(derive_vector_fn(nullcline_params)(fp)) .< sqrt(eps())) derive_vector_fn(nullcline_params)(fp)
+    @assert manhattan_norm(derive_vector_fn(nullcline_params)(fp)) .< sqrt(eps()) derive_vector_fn(nullcline_params)(fp)
     jac_fn = derive_jacobian_fn(nullcline_params)
     jac = jac_fn(fp)
     jacobian_is_oscillatory(jac)

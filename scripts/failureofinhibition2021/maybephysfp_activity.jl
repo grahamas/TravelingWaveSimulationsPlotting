@@ -262,7 +262,7 @@ for (sym, fp_arr) ∈ [(:monotonic, monotonic_fp_arr), (:blocking, blocking_fp_a
 end
 
 has_found = false
-for (sym, fp_arr, prototype_name) ∈ [(:monotonic, monotonic_fp_arr, "full_dynamics_monotonic"), (:blocking, blocking_fp_arr, "full_dynamics_blocking")] #, smods, prototype_name) ∈ [(:monotonic, monotonic_fp_arr, monotonic_nullcline_static_mods, monotonic_prototype_name), (:blocking, blocking_fp_arr, blocking_nullcline_static_mods, blocking_prototype_name)]
+for (sym, fp_arr, prototype_name) ∈ [(:monotonic, monotonic_fp_arr, "full_dynamics_monotonic"), (:blocking, blocking_fp_arr, "full_dynamics_blocking")] #, smods, prototype_name) ∈ [(:monotonic, monotonic_fp_arr, monotonic_nullcline_mods, monotonic_prototype_name), (:blocking, blocking_fp_arr, blocking_nullcline_mods, blocking_prototype_name)]
     prototype = get_prototype(prototype_name)
     stable_fp_Es = Array{Union{Float64,Missing}}(missing, size(fp_arr)..., 7)
     for (mx_idx, (nt, fps)) ∈ zip(CartesianIndices(fp_arr), TravelingWaveSimulationsPlotting.enumerate_nt(fp_arr))
@@ -310,7 +310,7 @@ for (sym, fp_arr) ∈ [(:monotonic, monotonic_fp_arr), (:blocking, blocking_fp_a
     )
 end
 
-for (sym, fp_arr, n_sfp_arr, prototype_name) ∈ [(:monotonic, monotonic_fp_arr, n_sfp_monotonic, "full_dynamics_monotonic"), (:blocking, blocking_fp_arr, n_sfp_blocking, "full_dynamics_blocking")] #, smods, prototype_name) ∈ [(:monotonic, monotonic_fp_arr, monotonic_nullcline_static_mods, monotonic_prototype_name), (:blocking, blocking_fp_arr, blocking_nullcline_static_mods, blocking_prototype_name)]
+for (sym, fp_arr, n_sfp_arr, prototype_name) ∈ [(:monotonic, monotonic_fp_arr, n_sfp_monotonic, "full_dynamics_monotonic"), (:blocking, blocking_fp_arr, n_sfp_blocking, "full_dynamics_blocking")] #, smods, prototype_name) ∈ [(:monotonic, monotonic_fp_arr, monotonic_nullcline_mods, monotonic_prototype_name), (:blocking, blocking_fp_arr, blocking_nullcline_mods, blocking_prototype_name)]
     prototype = get_prototype(prototype_name)
     stable_fp_Es = Array{Union{Float64,Missing}}(missing, size(fp_arr)..., 7)
     for (mx_idx, (nt, fps)) ∈ zip(CartesianIndices(fp_arr), TravelingWaveSimulationsPlotting.enumerate_nt(fp_arr))

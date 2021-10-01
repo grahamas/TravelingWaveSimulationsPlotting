@@ -44,9 +44,9 @@ function _potential_range(sig::AbstractSigmoidNonlinearityParameter)
     return range(sig.θ-radius, stop=nearly_one, length=100)
 end
 function _potential_range(dos::AbstractDifferenceOfSigmoidsParameter)
-    @assert get_firing_sigmoid(dos).θ < get_blocking_sigmoid(dos).θ
-    firing_range = _potential_range(get_firing_sigmoid(dos))
-    blocking_range = _potential_range(get_blocking_sigmoid(dos))
+    @assert get_firing_fn(dos).θ < get_blocking_fn(dos).θ
+    firing_range = _potential_range(get_firing_fn(dos))
+    blocking_range = _potential_range(get_blocking_fn(dos))
     return range(firing_range[begin], stop=blocking_range[end], length=1000)
 end
 function _potential_range(arr::AbstractArray{<:AbstractNonlinearityParameter})

@@ -2,7 +2,7 @@ calculate_fixedpoints(model::Union{AbstractModel,AbstractSimulation}, args...; k
 calculate_fixedpoints!(du_arr::AbstractArray{T,N}, field_axes, model::Union{AbstractModel{T},AbstractSimulation{T}}, args...; kwargs...) where {N,T} = calculate_fixedpoints!(du_arr, field_axes, get_nullcline_params(model), args...; kwargs...)
 
 function derive_vector_fn(
-    nullcline_params::Union{AbstractWCMNullclineParams,AbstractWCMDepNullclineParams}
+    nullcline_params::AbstractWCMNullclineParams
 )
     function wcm_du_dv(uv)
         u = uv[1]; v = uv[2]
@@ -12,14 +12,14 @@ function derive_vector_fn(
 end
 
 function derive_jacobian_fn(
-    nullcline_params::Union{AbstractWCMNullclineParams,AbstractWCMDepNullclineParams}
+    nullcline_params::AbstractWCMNullclineParams
 )
     wcm_du_dv =  derive_vector_fn(nullcline_params)
     uv -> ForwardDiff.jacobian(wcm_du_dv, uv)
 end
 
 function derive_vector_fn!(
-    nullcline_params::Union{AbstractWCMNullclineParams,AbstractWCMDepNullclineParams}
+    nullcline_params::AbstractWCMNullclineParams
 )
     function wcm_du_dv!(dudv, uv)
         u = uv[1]; v = uv[2]
@@ -29,14 +29,14 @@ function derive_vector_fn!(
 end
 
 function derive_jacobian_fn!(
-    nullcline_params::Union{AbstractWCMNullclineParams,AbstractWCMDepNullclineParams}
+    nullcline_params::AbstractWCMNullclineParams
 )
     wcm_du_dv! =  derive_vector_fn!(nullcline_params)
     (result, dudv, uv) -> jacobian!(result, wcm_du_dv!, dudv, uv)
 end
 
 function calculate_fixedpoints(
-        nullcline_params::Union{AbstractWCMNullclineParams,AbstractWCMDepNullclineParams}, 
+        nullcline_params::AbstractWCMNullclineParams, 
         axis_length::Integer=100
         ; 
         kwargs...
@@ -102,6 +102,7 @@ function calculate_fixedpoints!(
         for new_satisfactory_intersections ∈ new_satisfactory_intersections_list
             push!.(Ref(satisfactory_intersections), new_satisfactory_intersections)
         end
+        @assert all(manhattan_norm.(apply_field_fns.(Ref(field_fns), collect_array(satisfactory_intersections), Ref(nullcline_params))) .< zero_atol)
         return collect_array(satisfactory_intersections)
     end
 end
@@ -176,7 +177,8 @@ end
 function calculate_field!(field_vals::AbstractMatrix{T}, field_fn::Function, usvs::Vector{<:AbstractVector{T}}, p) where T
     us, vs = usvs
     us = collect(us); vs = collect(vs) # FIXME remove line when VectorizationBase updates to v0.18.3(ish)
-    @avx for u_idx ∈ axes(us,1), v_idx ∈ axes(vs,1)
+    # FIXME avx
+    for u_idx ∈ axes(us,1), v_idx ∈ axes(vs,1)
         field_vals[u_idx, v_idx] = field_fn(us[u_idx], vs[v_idx], p)
     end
     field_vals
@@ -203,7 +205,10 @@ struct FixedPointList{T,MLL<:MutableLinkedList{T},N,FNS<:NTuple{N,Function},P<:A
     params::P
     dist_atol::Float64
     zero_atol::Float64
-    FixedPointList(mll::MLL, field_fns::FNS, params::P, dist_atol, zero_atol) where {T, MLL <: MutableLinkedList{T}, N,FNS<:NTuple{N,Function},P<:AbstractNullclineParams} = new{T,MLL,N,FNS,P}(mll, field_fns, params, dist_atol, zero_atol)
+    FixedPointList(mll::MLL, field_fns::FNS, params::P, dist_atol, zero_atol) where {T, MLL <: MutableLinkedList{T}, N,FNS<:NTuple{N,Function},P<:AbstractNullclineParams} = begin
+        @assert all(manhattan_norm.(mll) .< zero_atol) 
+        new{T,MLL,N,FNS,P}(mll, field_fns, params, dist_atol, zero_atol)
+    end
     FixedPointList{T}(field_fns::FNS, params::P, dist_atol, zero_atol) where {T, N,FNS<:NTuple{N,Function},P<:AbstractNullclineParams} = FixedPointList(MutableLinkedList{T}(), field_fns, params, dist_atol, zero_atol)
 end
 function FixedPointList(points::VEC, args...) where {T,VEC<:AbstractVector{T}}

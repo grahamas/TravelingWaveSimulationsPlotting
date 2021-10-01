@@ -5,7 +5,7 @@ function lifted_wcm_param(;
     Aee=1., Aie=1., Aei=1.5, Aii=0.25,
     θef=0.125, θif=0.4, θib=7., τ=0.4, β=50.,
     decaye=1., decayi=1.)
-    @lift WCMParams(;
+    @lift WCMMonParams(;
             Aee=$(Node(Aee)), Aie=$(Node(Aie)), Aei=$(Node(Aei)), Aii=$(Node(Aii)),
             θef=$(Node(θef)), θif=$(Node(θif)), θib=$(Node(θib)), τ=$(Node(τ)), β=$(Node(β)),
             decaye=$(Node(decaye)), decayi=$(Node(decayi))

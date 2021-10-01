@@ -18,15 +18,17 @@ function wcm_sweep_calculate_fixedpoints(prototype_name::String, static_mods, dy
     vs = copy(us)
     dus = Array{Float64,2}(undef, length(us), length(vs))
 
-    sweep = product(sweep_axes...)
+
+    sweep = product(sweep_axes...) |> collect
     progress = Progress(length(sweep); dt=1, desc="Calculating fixed points array...", showspeed=true)
 
-    NamedAxisArray{NAMES}(map() do (sweeping_vals...)
+    NamedAxisArray{NAMES}(map(sweep) do (sweeping_vals...)
         sweeping_mods = NamedTuple{NAMES}(sweeping_vals...)
         sim = prototype(; static_mods..., sweeping_mods...)
         params = get_nullcline_params(sim.model)
         fps = calculate_fixedpoints!(dus, [us, vs], (wcm_du_defn, wcm_dv_defn), params, ((0.,1.), (0.,1.)))
         @assert length(fps) <= 7
         ProgressMeter.next!(progress)
+        fps
     end, sweep_axes)
 end
