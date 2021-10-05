@@ -9,10 +9,7 @@ function jacobian_is_stable(jac::Matrix)
 end
 function fixedpoint_is_stable(nullcline_params, fp)
     if !all(abs.(derive_vector_fn(nullcline_params)(fp)) .< sqrt(eps()))
-        @info "$(derive_vector_fn(nullcline_params)(fp)), $(
-                apply_field_fns(
-                    [wcm_du_defn, wcm_dv_defn], fp, nullcline_params)
-                ), $fp"
+        @error "Mismatch between loaded data and assumed parameters: $nullcline_params"
     end
     jac_fn = derive_jacobian_fn(nullcline_params)
     jac = jac_fn(fp)
