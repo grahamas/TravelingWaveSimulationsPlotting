@@ -1,6 +1,6 @@
 
-function slice(data::AxisArray{T,2}, target_line::PointVectorLine{2,T,S}, step_fineness=5) where {T,S}
-    xs, ys = axes_keys(data)
+function slice(data::NamedDimsArray{Names,T,2}, data_dims::NamedTuple{Names}, target_line::PointVectorLine{2,T,S}, step_fineness=5) where {Names,T,S}
+    xs, ys = data_dims
     interpolation = interpolate(data, Gridded(Linear()))
     return slice(interpolation, target_line, xs, ys, step_fineness)
 end
@@ -30,8 +30,8 @@ function slice(interpolation::AbstractInterpolation, target_line::PointVectorLin
     return (dists, values, points, line) 
 end
 
-function squish(data::AxisArray{T,2}, target_line::PointVectorLine{2,T,S}, args...) where {T,S}
-    xs, ys = axes_keys(data)
+function squish(data::NamedDimsArray{Names,T,2}, data_dims::NamedTuple{Names},target_line::PointVectorLine{2,T,S}, args...) where {Names,T,S}
+    xs, ys = data_dims
     interpolation = interpolate(data, Gridded(Linear()))
     return squish(interpolation, target_line, xs, ys, args...)
 end
@@ -61,10 +61,12 @@ function _midpoint(arr::AbstractArray)
     @assert arr[begin] < arr[end]
     return (arr[end] - arr[begin]) / 2 + arr[begin]
 end
-reduce_along_max_central_gradient(data::NamedAxisArray, args...) = reduce_along_max_central_gradient(data.data, args...)
-function reduce_along_max_central_gradient(data::AxisArray{T,2}, 
-        reduction::Function=slice, line_fineness=5) where T
-    xs, ys = axes_keys(data)
+
+function reduce_along_max_central_gradient(
+        data::NamedDimsArray{Names,T,2}, data_dims::NamedTuple{Names},
+        reduction::Function=slice, line_fineness=5
+    ) where {Names,T}
+    xs, ys = data_dims
     center_pt = [_midpoint(xs), _midpoint(ys)] 
     interpolation = interpolate(data, Gridded(Linear()))
 
@@ -87,10 +89,11 @@ function reduce_along_max_central_gradient(data::AxisArray{T,2},
     return reduction(interpolation, max_grad_line, xs, ys, line_fineness)
 end
 
-reduce_normal_to_halfmax_contour(data::NamedAxisArray, args...) = reduce_normal_to_halfmax_contour(data.data, args...)
-function reduce_normal_to_halfmax_contour(data::AxisArray{T,2}, 
-        reduction::Function=slice, line_fineness=5) where T
-    xs, ys = axes_keys(data)
+function reduce_normal_to_halfmax_contour(
+        data::NamedDimsArray{Names,T,2}, data_dims::NamedTuple{Names},
+        reduction::Function=slice, line_fineness=5
+    ) where {Names,T}
+    xs, ys = data_dims
     center_pt = (_midpoint(xs), _midpoint(ys))
     interpolation = interpolate(data, Gridded(Linear()))
 
@@ -122,9 +125,6 @@ function reduce_normal_to_halfmax_contour(data::AxisArray{T,2},
     return reduction(interpolation, resultant_gradient_line, xs, ys, line_fineness)
 end
 
-squish(data::NamedAxisArray, args...) = squish(data.data, args...)
-slice(data::NamedAxisArray, args...) = slice(data.data, args...)
-
 function draw_reduced_locations!(ax::Nothing, locs)
     @warn "no heatmap provided to inscribe reduction"
 end
@@ -136,10 +136,10 @@ end
 
 function plot_reduction!(scene::Scene, 
                             reducing_fn::Union{typeof(slice), typeof(squish)},
-                            data,
+                            data, data_dims,
                             heatmap_ax::Union{Nothing,MakieLayout.Axis}=nothing)
     reduction_layout = GridLayout()
-    dists, vals, locs, line = reduce_normal_to_halfmax_contour(data, reducing_fn)
+    dists, vals, locs, line = reduce_normal_to_halfmax_contour(data, data_dims, reducing_fn)
     if isnothing(dists)
         return nothing
     end

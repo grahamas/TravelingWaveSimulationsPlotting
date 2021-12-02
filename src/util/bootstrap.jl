@@ -9,12 +9,11 @@ struct Estimated{T}
     band::Union{T,Tuple{T,T}}
 end
 
-function bootstrap(fn::Function, naa::NamedAxisArray, kept_axes...; 
-        min_prop, max_prop, n_samples)
-    name_syms = _namedaxisarray_names(naa)
-    subsampled_syms = Tuple(setdiff(name_syms, kept_axes))
-    results_from_subsamples = map(fn, subsamples_over_axes(naa, subsampled_syms, min_prop, max_prop, n_samples))
-    result_from_full = fn(naa)
+function bootstrap(fn::Function, nda::NamedDimsArray{Names}, kept_axes...; 
+        min_prop, max_prop, n_samples) where Names
+    subsampled_syms = Tuple(setdiff(Names, kept_axes))
+    results_from_subsamples = map(fn, subsamples_over_axes(nda, subsampled_syms, min_prop, max_prop, n_samples))
+    result_from_full = fn(nda)
     return Bootstrapped(results_from_subsamples, result_from_full)
 end
 
@@ -78,8 +77,11 @@ function Base.iterate(subsampler::NamedAxesSubsampleIdxs, state=subsampler.n_sam
 end
 
 
-function subsamples_over_axes(naa::NamedAxisArray, axis_names, 
-        min_prop, max_prop, n_samples)
+function subsamples_over_axes
+        nda::NamedDimsArray{Names}, 
+        nda_dims::NamedTuple{Names}, 
+        min_prop, max_prop, n_samples
+    ) where Names
     axes_dict = Dict(name => axes_keys(naa)[dim(naa, name)] for name in axis_names)
     N = prod(length.(values(axes_dict)))
     @show axes_dict

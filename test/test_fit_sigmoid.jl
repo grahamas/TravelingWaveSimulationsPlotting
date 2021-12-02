@@ -11,10 +11,10 @@ grid = product(xs, ys)
 
 sigmoid_unit_diagonal(x, y) = simple_sigmoid(x - y, 0.1, 0.0)
 
-field_unit_diagonal = AxisArray([1 - sigmoid_unit_diagonal(x,y) + 0.1 * rand() for (x,y) in grid], xs, ys);
+field_unit_diagonal = [1 - sigmoid_unit_diagonal(x,y) + 0.1 * rand() for (x,y) in grid]
 
 using Makie: heatmap
-plot_sigmoid_unit_diagonal = heatmap(xs, ys, field_unit_diagonal.parent);
+plot_sigmoid_unit_diagonal = heatmap(xs, ys, field_unit_diagonal);
 
 dists, vals, locs, line = reduce_normal_to_halfmax_contour(field_unit_diagonal)
 
