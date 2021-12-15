@@ -24,6 +24,8 @@ using NeuralModels: AbstractSigmoidNonlinearityParameter, AbstractDifferenceOfSi
 using WilsonCowanModel: wcm_du_defn, wcm_dv_defn, WCMMonParams, AbstractNullclineParams, get_nullcline_params
 using Makie: @lift
 
+include("util/nameddims_ops.jl")
+
 include("util/lines.jl")
 #include("util/bootstrap.jl")
 include("util/fitting_sigmoid.jl")

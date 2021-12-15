@@ -48,7 +48,7 @@ end
 
 plot_averaged_to_axes(data, axes::NTuple) = plot_averaged_to_axes(data, [axes])
 
-function multiple_averaged_to_axes(data::AbstractArray; axes, multi_param_syms, kwargs...)
+function multiple_averaged_to_axes(data::NamedDimsArray{Names}, data_dims::NamedTuple{Names}; axes, multi_param_syms, kwargs...) where Names
     multi_param_values = map(sym -> get_axis_values(data, sym), multi_param_syms)
     multi_param_coords = product(multi_param_values...)
     scene_layout_name_list = map(multi_param_coords) do coord

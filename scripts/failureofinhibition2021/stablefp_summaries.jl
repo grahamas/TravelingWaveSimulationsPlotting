@@ -22,14 +22,14 @@ include(scriptsdir("load/he_sweep_arrs.jl"))
 
 let nt_map(fn::Function, nt::NamedTuple{NS}) where NS = NamedTuple{NS}(map(fn, values(nt))),
     fp_arr_nt = (
-        fire_fail=blocking_fp_arr[Aee=sub_A_range,Aei=sub_A_range,Aie=sub_A_range,Aii=sub_A_range],
-        fire=monotonic_fp_arr[Aee=sub_A_range,Aei=sub_A_range,Aie=sub_A_range,Aii=sub_A_range]
+        Symbol("fire→fail")=>blocking_fp_arr[Aee=sub_A_range,Aei=sub_A_range,Aie=sub_A_range,Aii=sub_A_range],
+        :fire=>monotonic_fp_arr[Aee=sub_A_range,Aei=sub_A_range,Aie=sub_A_range,Aii=sub_A_range]
     ),
     nonl_types = keys(fp_arr_nt),
     fp_count_arr_nt = nt_map(x -> length.(x), fp_arr_nt),
-    prototype_name_nt = (
-        fire="full_dynamics_monotonic",
-        fire_fail="full_dynamics_blocking"
+    prototype_name_nt = Dict(
+        :fire=>"full_dynamics_monotonic",
+        Symbol("fire→fail")=>"full_dynamics_blocking"
     ),
     E_bounds = [0.05, 0.71],
     SI_bounds = [0.05, 0.71],
