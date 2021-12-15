@@ -1,7 +1,7 @@
 name = "TravelingWaveSimulationsPlotting"
 uuid = "090ce58c-883b-45c9-8a81-7f2bda835033"
 authors = ["Graham Smith <grahamas@gmail.com>"]
-version = "0.2.4"
+version = "0.2.5"
 
 [deps]
 AlgebraOfGraphics = "cbdf2221-f076-402e-a563-3d30da359d67"
