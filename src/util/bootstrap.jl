@@ -77,7 +77,7 @@ function Base.iterate(subsampler::NamedAxesSubsampleIdxs, state=subsampler.n_sam
 end
 
 
-function subsamples_over_axes
+function subsamples_over_axes(
         nda::NamedDimsArray{Names}, 
         nda_dims::NamedTuple{Names}, 
         min_prop, max_prop, n_samples
