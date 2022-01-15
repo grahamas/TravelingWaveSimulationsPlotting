@@ -1,7 +1,7 @@
 name = "TravelingWaveSimulationsPlotting"
 uuid = "090ce58c-883b-45c9-8a81-7f2bda835033"
 authors = ["Graham Smith <grahamas@gmail.com>"]
-version = "0.2.8"
+version = "0.2.9"
 
 [deps]
 AlgebraOfGraphics = "cbdf2221-f076-402e-a563-3d30da359d67"
@@ -20,7 +20,6 @@ DiffEqOperators = "9fdde737-9c7f-55bf-ade8-46b3f136cc48"
 DifferentialEquations = "0c46a032-eb83-5123-abaf-570d42b7fbaa"
 DrWatson = "634d3b9d-ee7a-5ddf-bec9-22491ea816e1"
 ForwardDiff = "f6369f11-7733-5829-9624-2563aa707210"
-GLMakie = "e9467ef8-e4e7-5192-8a1a-b1aee30e663a"
 HypothesisTests = "09f84164-cd44-5f33-b23f-e6b0d136a0d5"
 Interpolations = "a98d9a8b-a2ab-59e6-89dd-64a1c18fca59"
 IterTools = "c8e1da08-722c-5040-9ed9-7db0dc04731e"
